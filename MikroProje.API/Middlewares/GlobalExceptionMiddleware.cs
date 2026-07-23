@@ -36,6 +36,29 @@ public class GlobalExceptionMiddleware
             
             await context.Response.WriteAsync(result);
         }
+        catch (FluentValidation.ValidationException ex)
+        {
+            _logger.LogWarning(ex, "Validation error occurred.");
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            context.Response.ContentType = "application/json";
+
+            var errors = ex.Errors
+                .GroupBy(e => e.PropertyName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(e => e.ErrorMessage).ToArray()
+                );
+
+            var result = JsonSerializer.Serialize(new
+            {
+                type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                title = "One or more validation errors occurred.",
+                status = StatusCodes.Status400BadRequest,
+                errors = errors
+            });
+
+            await context.Response.WriteAsync(result);
+        }
         // Diğer hatalar uygulamanın mevcut exception handler'ına (DeveloperExceptionPage) gitmeye devam eder.
     }
 }

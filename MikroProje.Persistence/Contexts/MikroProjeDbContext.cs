@@ -11,6 +11,8 @@ public class MikroProjeDbContext : DbContext
     }
 
     public DbSet<CurrentAccount> CurrentAccounts => Set<CurrentAccount>();
+    public DbSet<AppUser> AppUsers => Set<AppUser>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     public DbSet<Product> Products => Set<Product>();
 
@@ -20,7 +22,13 @@ public class MikroProjeDbContext : DbContext
 
     public DbSet<SaleDetail> SaleDetails => Set<SaleDetail>();
 
-    public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<Payment> Payments { get; set; } = null!;
+
+    public DbSet<Purchase> Purchases { get; set; } = null!;
+
+    public DbSet<PurchaseItem> PurchaseItems { get; set; } = null!;
+
+    public DbSet<SupplierPayment> SupplierPayments { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

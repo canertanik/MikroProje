@@ -13,4 +13,8 @@ public interface ICurrentAccountRepository
     Task AddAsync(CurrentAccount currentAccount, CancellationToken cancellationToken);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
+
+    Task<bool> ExistsAsync(int id, CancellationToken cancellationToken);
+
+    Task<List<MikroProje.Application.Features.CurrentAccounts.DTOs.StatementDto>> GetStatementTransactionsAsync(int currentAccountId, CancellationToken cancellationToken);
 }

@@ -32,5 +32,8 @@ public class CurrentAccountConfiguration : IEntityTypeConfiguration<CurrentAccou
 
         builder.Property(x => x.Balance)
             .HasColumnType("decimal(18,2)");
+
+        builder.Property(x => x.RowVersion)
+            .IsRowVersion();
     }
 }

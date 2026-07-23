@@ -22,4 +22,6 @@ public class CurrentAccount : BaseEntity
     public ICollection<Sale> Sales { get; set; } = new List<Sale>();
 
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }

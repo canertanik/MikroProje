@@ -18,6 +18,11 @@ public static class DependencyInjection
         services.AddScoped<MikroProje.Application.Interfaces.IStockMovementRepository, StockMovementRepository>();
         services.AddScoped<MikroProje.Application.Interfaces.ISaleRepository, SaleRepository>();
         services.AddScoped<MikroProje.Application.Interfaces.IPaymentRepository, PaymentRepository>();
+        services.AddScoped<MikroProje.Application.Interfaces.IPurchaseRepository, PurchaseRepository>();
+        services.AddScoped<MikroProje.Application.Interfaces.ISupplierPaymentRepository, SupplierPaymentRepository>();
+        services.AddScoped<MikroProje.Application.Interfaces.IDashboardRepository, DashboardRepository>();
+        services.AddScoped<MikroProje.Application.Interfaces.IAppUserRepository, AppUserRepository>();
+        services.AddScoped<MikroProje.Application.Interfaces.IRefreshTokenRepository, RefreshTokenRepository>();
 
         return services;
     }

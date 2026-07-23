@@ -130,4 +130,36 @@ public class CurrentAccountsController : ControllerBase
     {
         return new ValidationProblemDetails(CreateValidationErrors(exception));
     }
+
+    [HttpGet("{id:int}/statement")]
+    [ProducesResponseType(typeof(Result<MikroProje.Application.Common.Pagination.PagedResult<StatementDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetStatement(
+        int id, 
+        [FromQuery] DateTime? startDate, 
+        [FromQuery] DateTime? endDate, 
+        [FromQuery] int pageNumber = 1, 
+        [FromQuery] int pageSize = 20, 
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var query = new MikroProje.Application.Features.CurrentAccounts.Queries.GetStatement.GetCurrentAccountStatementQuery
+            {
+                CurrentAccountId = id,
+                StartDate = startDate,
+                EndDate = endDate,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            var result = await _mediator.Send(query, cancellationToken);
+            return StatusCode(result.StatusCode, result);
+        }
+        catch (ValidationException exception)
+        {
+            return ValidationProblem(CreateValidationProblemDetails(exception));
+        }
+    }
 }

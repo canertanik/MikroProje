@@ -10,6 +10,7 @@ using MikroProje.Application.Features.Products.Queries.GetAllProducts;
 using MikroProje.Application.Features.Products.Queries.GetCriticalStockProducts;
 using MikroProje.Application.Features.Products.Queries.GetProductById;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MikroProje.API.Controllers;
 
@@ -89,6 +90,7 @@ public class ProductsController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [ProducesResponseType(typeof(Result<ProductDto>), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreateProductCommand command, CancellationToken cancellationToken)

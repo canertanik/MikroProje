@@ -41,6 +41,13 @@ public class ProductRepository : IProductRepository
             .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken);
     }
 
+    public async Task<List<Product>> GetByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken)
+    {
+        return await _dbContext.Products
+            .Where(x => ids.Contains(x.Id) && !x.IsDeleted)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<(IReadOnlyCollection<Product> Items, int TotalCount)> GetPagedAsync(string? search, bool? criticalOnly, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
         var query = _dbContext.Products

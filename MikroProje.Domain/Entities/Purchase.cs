@@ -1,0 +1,22 @@
+using MikroProje.Domain.Common;
+
+namespace MikroProje.Domain.Entities;
+
+public class Purchase : BaseEntity
+{
+    public int CurrentAccountId { get; set; }
+
+    public CurrentAccount CurrentAccount { get; set; } = null!;
+
+    public DateTime PurchaseDate { get; set; } = DateTime.UtcNow;
+
+    public decimal Subtotal { get; set; }
+
+    public decimal VatAmount { get; set; }
+
+    public decimal GrandTotal { get; set; }
+
+    public string? Description { get; set; }
+
+    public ICollection<PurchaseItem> Items { get; set; } = new List<PurchaseItem>();
+}

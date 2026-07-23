@@ -10,6 +10,8 @@ public interface IProductRepository
 
     Task<Product?> GetByIdAsync(int id, CancellationToken cancellationToken);
 
+    Task<List<Product>> GetByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken);
+
     Task<(IReadOnlyCollection<Product> Items, int TotalCount)> GetPagedAsync(string? search, bool? criticalOnly, int pageNumber, int pageSize, CancellationToken cancellationToken);
 
     Task<(IReadOnlyCollection<Product> Items, int TotalCount)> GetCriticalStockPagedAsync(string? search, int pageNumber, int pageSize, CancellationToken cancellationToken);
