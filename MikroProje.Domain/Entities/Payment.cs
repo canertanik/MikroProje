@@ -13,7 +13,11 @@ public class Payment : BaseEntity
 
     public PaymentType Type { get; set; }
 
+    public PaymentMethod PaymentMethod { get; set; }
+
     public string? Description { get; set; }
 
     public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
+
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MikroProje.Persistence.Contexts;
 
@@ -11,9 +12,11 @@ using MikroProje.Persistence.Contexts;
 namespace MikroProje.Persistence.Migrations
 {
     [DbContext(typeof(MikroProjeDbContext))]
-    partial class MikroProjeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260723084407_AddPaymentModule")]
+    partial class AddPaymentModule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

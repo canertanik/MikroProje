@@ -18,6 +18,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<MikroProje.API.Middlewares.GlobalExceptionMiddleware>();
+
 app.MapControllers();
 
 app.Run();

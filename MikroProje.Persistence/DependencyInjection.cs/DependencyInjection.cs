@@ -17,6 +17,7 @@ public static class DependencyInjection
         services.AddScoped<MikroProje.Application.Interfaces.IProductRepository, ProductRepository>();
         services.AddScoped<MikroProje.Application.Interfaces.IStockMovementRepository, StockMovementRepository>();
         services.AddScoped<MikroProje.Application.Interfaces.ISaleRepository, SaleRepository>();
+        services.AddScoped<MikroProje.Application.Interfaces.IPaymentRepository, PaymentRepository>();
 
         return services;
     }
