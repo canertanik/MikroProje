@@ -6,10 +6,12 @@ using MikroProje.Application.Features.StockMovements.Commands.CreateStockMovemen
 using MikroProje.Application.Features.StockMovements.DTOs;
 using MikroProje.Application.Features.StockMovements.Queries.GetStockMovementsByProduct;
 using MikroProje.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MikroProje.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/stock-movements")]
 public class StockMovementsController : ControllerBase
@@ -21,6 +23,7 @@ public class StockMovementsController : ControllerBase
         _mediator = mediator;
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [ProducesResponseType(typeof(Result<StockMovementDto>), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreateStockMovementCommand command, CancellationToken cancellationToken)

@@ -9,10 +9,12 @@ using MikroProje.Application.Features.Sales.DTOs;
 using MikroProje.Application.Features.Sales.Queries.GetAllSales;
 using MikroProje.Application.Features.Sales.Queries.GetSaleById;
 using MikroProje.Application.Features.Sales.Queries.GetSalesByCurrentAccount;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MikroProje.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/sales")]
 public class SalesController : ControllerBase
@@ -106,6 +108,7 @@ public class SalesController : ControllerBase
     /// <summary>
     /// Yeni satış oluşturur. Transaction: Sale + SaleDetail + StockOut + Stok güncelle + Bakiye artır.
     /// </summary>
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [ProducesResponseType(typeof(Result<SaleDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -133,6 +136,7 @@ public class SalesController : ControllerBase
     /// <summary>
     /// Satış açıklamasını günceller (kalem değişikliği yapılamaz).
     /// </summary>
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(Result<SaleDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -155,6 +159,7 @@ public class SalesController : ControllerBase
     /// <summary>
     /// Satışı iptal eder. Transaction: StockIn (ters hareket) + Stok geri + Bakiye düşür + Soft delete.
     /// </summary>
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

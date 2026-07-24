@@ -11,6 +11,7 @@ using System.Security.Claims;
 
 namespace MikroProje.API.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class AuthController : ControllerBase
@@ -22,6 +23,7 @@ public class AuthController : ControllerBase
         _mediator = mediator;
     }
 
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequestDto request, CancellationToken cancellationToken)
     {
@@ -30,6 +32,7 @@ public class AuthController : ControllerBase
         return StatusCode(result.StatusCode, result);
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto request, CancellationToken cancellationToken)
     {
@@ -38,6 +41,7 @@ public class AuthController : ControllerBase
         return StatusCode(result.StatusCode, result);
     }
 
+    [AllowAnonymous]
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request, CancellationToken cancellationToken)
     {
@@ -46,7 +50,6 @@ public class AuthController : ControllerBase
         return StatusCode(result.StatusCode, result);
     }
 
-    [Authorize]
     [HttpPost("revoke-token")]
     public async Task<IActionResult> RevokeToken([FromBody] RevokeTokenRequestDto request, CancellationToken cancellationToken)
     {
@@ -55,7 +58,6 @@ public class AuthController : ControllerBase
         return StatusCode(result.StatusCode, result);
     }
 
-    [Authorize]
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUser(CancellationToken cancellationToken)
     {

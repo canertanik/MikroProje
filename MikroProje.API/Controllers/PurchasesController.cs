@@ -6,9 +6,11 @@ using MikroProje.Application.Features.Purchases.Commands.CreatePurchase;
 using MikroProje.Application.Features.Purchases.DTOs;
 using MikroProje.Application.Features.Purchases.Queries.GetAllPurchases;
 using MikroProje.Application.Features.Purchases.Queries.GetPurchaseById;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MikroProje.API.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class PurchasesController : ControllerBase
@@ -43,6 +45,7 @@ public class PurchasesController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [ProducesResponseType(typeof(Result<PurchaseDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Result<PurchaseDto>), StatusCodes.Status400BadRequest)]

@@ -7,10 +7,12 @@ using MikroProje.Application.Features.CurrentAccounts.Commands.UpdateCurrentAcco
 using MikroProje.Application.Features.CurrentAccounts.DTOs;
 using MikroProje.Application.Features.CurrentAccounts.Queries.GetAllCurrentAccounts;
 using MikroProje.Application.Features.CurrentAccounts.Queries.GetCurrentAccountById;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MikroProje.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/current-accounts")]
 public class CurrentAccountsController : ControllerBase
@@ -53,6 +55,7 @@ public class CurrentAccountsController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [ProducesResponseType(typeof(Result<CurrentAccountDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -76,6 +79,7 @@ public class CurrentAccountsController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(Result<CurrentAccountDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -95,6 +99,7 @@ public class CurrentAccountsController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -5,10 +5,12 @@ using MikroProje.Application.Features.SupplierPayments.Commands.CreateSupplierPa
 using MikroProje.Application.Features.SupplierPayments.DTOs;
 using MikroProje.Application.Features.SupplierPayments.Queries.GetAllSupplierPayments;
 using MikroProje.Application.Features.SupplierPayments.Queries.GetSupplierPaymentById;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MikroProje.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/supplier-payments")]
 public class SupplierPaymentsController : ControllerBase
@@ -20,6 +22,7 @@ public class SupplierPaymentsController : ControllerBase
         _mediator = mediator;
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [ProducesResponseType(typeof(Result<SupplierPaymentDto>), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreateSupplierPaymentCommand command, CancellationToken cancellationToken)

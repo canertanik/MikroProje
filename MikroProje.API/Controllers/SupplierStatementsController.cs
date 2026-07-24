@@ -1,9 +1,11 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MikroProje.Application.Features.SupplierStatements.Queries.GetSupplierStatement;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MikroProje.API.Controllers;
 
+[Authorize]
 [Route("api/supplier-statements")]
 [ApiController]
 public class SupplierStatementsController : ControllerBase

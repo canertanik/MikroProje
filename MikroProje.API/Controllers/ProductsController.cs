@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace MikroProje.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/products")]
 public class ProductsController : ControllerBase
@@ -113,6 +114,7 @@ public class ProductsController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(Result<ProductDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateProductCommand command, CancellationToken cancellationToken)
@@ -131,6 +133,7 @@ public class ProductsController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)

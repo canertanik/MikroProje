@@ -8,10 +8,12 @@ using MikroProje.Application.Features.Payments.Commands.UpdatePayment;
 using MikroProje.Application.Features.Payments.DTOs;
 using MikroProje.Application.Features.Payments.Queries.GetPaymentById;
 using MikroProje.Application.Features.Payments.Queries.GetPayments;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MikroProje.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/payments")]
 public class PaymentsController : ControllerBase
@@ -23,6 +25,7 @@ public class PaymentsController : ControllerBase
         _mediator = mediator;
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [ProducesResponseType(typeof(Result<PaymentDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -72,6 +75,7 @@ public class PaymentsController : ControllerBase
         return StatusCode(result.StatusCode, result);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(Result<PaymentDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -91,6 +95,7 @@ public class PaymentsController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
