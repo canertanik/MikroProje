@@ -90,3 +90,57 @@ dotnet run --project MikroProje.API
 
 ```
 
+
+## ?? Docker ile Çalýþtýrma
+
+Proje, Docker ve Docker Compose kullanýlarak tek bir komutla ayaða kaldýrýlabilir. 
+
+### Ön Koþullar
+- **Docker Desktop** (veya eþdeðer bir Docker ortamý) sisteminizde kurulu ve çalýþýr durumda olmalýdýr.
+
+### Adým Adým Kurulum
+
+1. Repository'yi klonlayýn:
+   `ash
+   git clone https://github.com/canertanik/MikroProje.git
+   cd MikroProje
+   `
+
+2. .env dosyasýný oluþturun:
+   Kök dizindeki .env.example dosyasýnýn adýný .env olarak deðiþtirin veya kopyalayýn. Ýçerisindeki SQL Server SA þifresini kendinize göre güncelleyin.
+   `env
+   SA_PASSWORD=SizinÇokGüçlüÞifreniz123!
+   ASPNETCORE_ENVIRONMENT=Development
+   `
+   *Not: SQL Server güçlü bir þifre gerektirir (En az 8 karakter, büyük harf, küçük harf, rakam ve özel karakter).*
+
+3. Konteynerleri baþlatýn:
+   `ash
+   docker compose up --build -d
+   `
+
+4. Servislere Eriþin:
+   - **API Adresi:** http://localhost:8080
+   - **Swagger (Development):** http://localhost:8080/swagger
+   - **Health Check:** http://localhost:8080/health
+
+5. Loglarý Görüntüleme:
+   `ash
+   docker compose logs -f api
+   `
+
+6. Sistemi Durdurma:
+   `ash
+   docker compose down
+   `
+
+7. Sistemi Verilerle Birlikte Tamamen Silme (DÝKKAT!):
+   Veritabaný (mikroproje-sql-data volume) dahil tüm container ve verileri silmek için:
+   `ash
+   docker compose down -v
+   `
+
+### Sýk Karþýlaþýlan Hatalar
+- **SQL Server Password Hatasý:** Veritabaný ayaða kalkmýyorsa, docker compose logs sqlserver komutuyla hataya bakýn. Çoðunlukla SA_PASSWORD kurallara uymadýðýnda bu hata alýnýr. Lütfen þifrenizin büyük harf, küçük harf, rakam ve sembol içerdiðinden emin olun.
+- **Port Çakýþmasý:** Eðer 8080 veya 1433 portlarý baþka bir uygulama tarafýndan kullanýlýyorsa, docker-compose.yml içindeki ports eþleþtirmelerini 8081:8080 þeklinde deðiþtirebilirsiniz.
+

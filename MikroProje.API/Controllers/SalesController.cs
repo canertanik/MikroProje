@@ -1,4 +1,4 @@
-using MikroProje.Application.Features.Sales.Queries.ExportSalesPdf;
+﻿using MikroProje.Application.Features.Sales.Queries.ExportSalesPdf;
 using FluentValidation;
 using MediatR;
 using MikroProje.Application.Common.Pagination;
@@ -28,7 +28,7 @@ public class SalesController : ControllerBase
     }
 
     /// <summary>
-    /// Tüm satışları sayfalı listeler (iptal edilmiş satışlar hariç).
+    /// TÃ¼m satÄ±ÅŸlarÄ± sayfalÄ± listeler (iptal edilmiÅŸ satÄ±ÅŸlar hariÃ§).
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(Result<PagedResult<SaleDto>>), StatusCodes.Status200OK)]
@@ -56,7 +56,7 @@ public class SalesController : ControllerBase
     }
 
     /// <summary>
-    /// Id'ye göre satış getirir.
+    /// Id'ye gÃ¶re satÄ±ÅŸ getirir.
     /// </summary>
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(Result<SaleDto>), StatusCodes.Status200OK)]
@@ -77,7 +77,7 @@ public class SalesController : ControllerBase
     }
 
     /// <summary>
-    /// Cariye ait satışları sayfalı listeler.
+    /// Cariye ait satÄ±ÅŸlarÄ± sayfalÄ± listeler.
     /// </summary>
     [HttpGet("current-account/{currentAccountId:int}")]
     [ProducesResponseType(typeof(Result<PagedResult<SaleDto>>), StatusCodes.Status200OK)]
@@ -107,14 +107,10 @@ public class SalesController : ControllerBase
     }
 
     /// <summary>
-    /// Yeni satış oluşturur. Transaction: Sale + SaleDetail + StockOut + Stok güncelle + Bakiye artır.
+    /// Yeni satÄ±ÅŸ oluÅŸturur. Transaction: Sale + SaleDetail + StockOut + Stok gÃ¼ncelle + Bakiye artÄ±r.
     /// </summary>
     [Authorize(Roles = "Admin")]
-    [HttpPost]
-    [ProducesResponseType(typeof(Result<SaleDto>), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [HttpGet("export")]
+    [HttpGet("export")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Export(CancellationToken cancellationToken = default)
@@ -153,7 +149,7 @@ public class SalesController : ControllerBase
     }
 
     /// <summary>
-    /// Satış açıklamasını günceller (kalem değişikliği yapılamaz).
+    /// SatÄ±ÅŸ aÃ§Ä±klamasÄ±nÄ± gÃ¼nceller (kalem deÄŸiÅŸikliÄŸi yapÄ±lamaz).
     /// </summary>
     [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
@@ -176,7 +172,7 @@ public class SalesController : ControllerBase
     }
 
     /// <summary>
-    /// Satışı iptal eder. Transaction: StockIn (ters hareket) + Stok geri + Bakiye düşür + Soft delete.
+    /// SatÄ±ÅŸÄ± iptal eder. Transaction: StockIn (ters hareket) + Stok geri + Bakiye dÃ¼ÅŸÃ¼r + Soft delete.
     /// </summary>
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
@@ -213,6 +209,7 @@ public class SalesController : ControllerBase
         return BadRequest(result.Message);
     }
 }
+
 
 
 

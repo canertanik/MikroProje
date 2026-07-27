@@ -22,3 +22,5 @@ TestResults/
 # Windows
 Thumbs.db
 .DS_Store
+# Docker env
+.env

@@ -1,4 +1,4 @@
-using MikroProje.Application.Features.CurrentAccounts.Queries.ExportCurrentAccountsPdf;
+﻿using MikroProje.Application.Features.CurrentAccounts.Queries.ExportCurrentAccountsPdf;
 using FluentValidation;
 using MediatR;
 using MikroProje.Application.Common.Results;
@@ -57,11 +57,7 @@ public class CurrentAccountsController : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
-    [HttpPost]
-    [ProducesResponseType(typeof(Result<CurrentAccountDto>), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [HttpGet("export")]
+    [HttpGet("export")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Export(CancellationToken cancellationToken = default)
@@ -197,6 +193,7 @@ public class CurrentAccountsController : ControllerBase
         return BadRequest(result.Message);
     }
 }
+
 
 
 

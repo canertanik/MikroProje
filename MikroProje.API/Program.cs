@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -8,6 +11,7 @@ using MikroProje.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHealthChecks().AddDbContextCheck<MikroProje.Persistence.Contexts.MikroProjeDbContext>();
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<MikroProje.Application.Interfaces.ICurrentUserService, MikroProje.API.Services.CurrentUserService>();
@@ -88,6 +92,44 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
+
+if (builder.Configuration["Database:ApplyMigrations"] == "true")
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        var context = services.GetRequiredService<MikroProje.Persistence.Contexts.MikroProjeDbContext>();
+        
+        if (context.Database.IsSqlServer())
+        {
+            int retries = 5;
+            int delayMs = 2000;
+            for (int i = 0; i < retries; i++)
+            {
+                try
+                {
+                    await context.Database.MigrateAsync();
+                    logger.LogInformation("Database migration applied successfully.");
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Migration attempt {Attempt} failed. Retrying in {Delay}ms...", i + 1, delayMs);
+                    if (i == retries - 1)
+                    {
+                        logger.LogError(ex, "All migration attempts failed.");
+                        throw;
+                    }
+                    await Task.Delay(delayMs);
+                }
+            }
+        }
+    }
+}
 
 app.Run();
+
+
 

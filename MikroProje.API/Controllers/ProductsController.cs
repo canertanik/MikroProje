@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using MikroProje.Application.Common.Pagination;
 using MikroProje.Application.Common.Results;
@@ -94,9 +94,7 @@ public class ProductsController : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
-    [HttpPost]
-    [ProducesResponseType(typeof(Result<ProductDto>), StatusCodes.Status201Created)]
-        [HttpGet("export")]
+    [HttpGet("export")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Export([FromQuery] string? search, [FromQuery] bool? criticalOnly, CancellationToken cancellationToken = default)
@@ -190,5 +188,6 @@ public class ProductsController : ControllerBase
         return BadRequest(result.Message);
     }
 }
+
 
 

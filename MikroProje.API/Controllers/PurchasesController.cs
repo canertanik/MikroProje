@@ -1,4 +1,4 @@
-using MikroProje.Application.Features.Purchases.Queries.ExportPurchasesPdf;
+﻿using MikroProje.Application.Features.Purchases.Queries.ExportPurchasesPdf;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MikroProje.Application.Common.Pagination;
@@ -47,13 +47,7 @@ public class PurchasesController : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
-    [HttpPost]
-    [ProducesResponseType(typeof(Result<PurchaseDto>), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(Result<PurchaseDto>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(Result<PurchaseDto>), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(Result<PurchaseDto>), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(typeof(Result<PurchaseDto>), StatusCodes.Status422UnprocessableEntity)]
-        [HttpGet("export")]
+    [HttpGet("export")]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Export(CancellationToken cancellationToken = default)
@@ -93,6 +87,7 @@ public class PurchasesController : ControllerBase
         return BadRequest(result.Message);
     }
 }
+
 
 
 
