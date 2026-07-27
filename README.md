@@ -1,3 +1,5 @@
+ï»¿[![MikroProje CI](https://github.com/canertanik/MikroProje/actions/workflows/ci.yml/badge.svg)](https://github.com/canertanik/MikroProje/actions/workflows/ci.yml)
+
 \# MikroProje ERP
 
 
@@ -91,40 +93,40 @@ dotnet run --project MikroProje.API
 ```
 
 
-## ?? Docker ile Çalýþtýrma
+## ?? Docker ile ï¿½alï¿½ï¿½tï¿½rma
 
-Proje, Docker ve Docker Compose kullanýlarak tek bir komutla ayaða kaldýrýlabilir. 
+Proje, Docker ve Docker Compose kullanï¿½larak tek bir komutla ayaï¿½a kaldï¿½rï¿½labilir. 
 
-### Ön Koþullar
-- **Docker Desktop** (veya eþdeðer bir Docker ortamý) sisteminizde kurulu ve çalýþýr durumda olmalýdýr.
+### ï¿½n Koï¿½ullar
+- **Docker Desktop** (veya eï¿½deï¿½er bir Docker ortamï¿½) sisteminizde kurulu ve ï¿½alï¿½ï¿½ï¿½r durumda olmalï¿½dï¿½r.
 
-### Adým Adým Kurulum
+### Adï¿½m Adï¿½m Kurulum
 
-1. Repository'yi klonlayýn:
+1. Repository'yi klonlayï¿½n:
    `ash
    git clone https://github.com/canertanik/MikroProje.git
    cd MikroProje
    `
 
-2. .env dosyasýný oluþturun:
-   Kök dizindeki .env.example dosyasýnýn adýný .env olarak deðiþtirin veya kopyalayýn. Ýçerisindeki SQL Server SA þifresini kendinize göre güncelleyin.
+2. .env dosyasï¿½nï¿½ oluï¿½turun:
+   Kï¿½k dizindeki .env.example dosyasï¿½nï¿½n adï¿½nï¿½ .env olarak deï¿½iï¿½tirin veya kopyalayï¿½n. ï¿½ï¿½erisindeki SQL Server SA ï¿½ifresini kendinize gï¿½re gï¿½ncelleyin.
    `env
-   SA_PASSWORD=SizinÇokGüçlüÞifreniz123!
+   SA_PASSWORD=Sizinï¿½okGï¿½ï¿½lï¿½ï¿½ifreniz123!
    ASPNETCORE_ENVIRONMENT=Development
    `
-   *Not: SQL Server güçlü bir þifre gerektirir (En az 8 karakter, büyük harf, küçük harf, rakam ve özel karakter).*
+   *Not: SQL Server gï¿½ï¿½lï¿½ bir ï¿½ifre gerektirir (En az 8 karakter, bï¿½yï¿½k harf, kï¿½ï¿½ï¿½k harf, rakam ve ï¿½zel karakter).*
 
-3. Konteynerleri baþlatýn:
+3. Konteynerleri baï¿½latï¿½n:
    `ash
    docker compose up --build -d
    `
 
-4. Servislere Eriþin:
+4. Servislere Eriï¿½in:
    - **API Adresi:** http://localhost:8080
    - **Swagger (Development):** http://localhost:8080/swagger
    - **Health Check:** http://localhost:8080/health
 
-5. Loglarý Görüntüleme:
+5. Loglarï¿½ Gï¿½rï¿½ntï¿½leme:
    `ash
    docker compose logs -f api
    `
@@ -134,13 +136,14 @@ Proje, Docker ve Docker Compose kullanýlarak tek bir komutla ayaða kaldýrýlabili
    docker compose down
    `
 
-7. Sistemi Verilerle Birlikte Tamamen Silme (DÝKKAT!):
-   Veritabaný (mikroproje-sql-data volume) dahil tüm container ve verileri silmek için:
+7. Sistemi Verilerle Birlikte Tamamen Silme (Dï¿½KKAT!):
+   Veritabanï¿½ (mikroproje-sql-data volume) dahil tï¿½m container ve verileri silmek iï¿½in:
    `ash
    docker compose down -v
    `
 
-### Sýk Karþýlaþýlan Hatalar
-- **SQL Server Password Hatasý:** Veritabaný ayaða kalkmýyorsa, docker compose logs sqlserver komutuyla hataya bakýn. Çoðunlukla SA_PASSWORD kurallara uymadýðýnda bu hata alýnýr. Lütfen þifrenizin büyük harf, küçük harf, rakam ve sembol içerdiðinden emin olun.
-- **Port Çakýþmasý:** Eðer 8080 veya 1433 portlarý baþka bir uygulama tarafýndan kullanýlýyorsa, docker-compose.yml içindeki ports eþleþtirmelerini 8081:8080 þeklinde deðiþtirebilirsiniz.
+### Sï¿½k Karï¿½ï¿½laï¿½ï¿½lan Hatalar
+- **SQL Server Password Hatasï¿½:** Veritabanï¿½ ayaï¿½a kalkmï¿½yorsa, docker compose logs sqlserver komutuyla hataya bakï¿½n. ï¿½oï¿½unlukla SA_PASSWORD kurallara uymadï¿½ï¿½ï¿½nda bu hata alï¿½nï¿½r. Lï¿½tfen ï¿½ifrenizin bï¿½yï¿½k harf, kï¿½ï¿½ï¿½k harf, rakam ve sembol iï¿½erdiï¿½inden emin olun.
+- **Port ï¿½akï¿½ï¿½masï¿½:** Eï¿½er 8080 veya 1433 portlarï¿½ baï¿½ka bir uygulama tarafï¿½ndan kullanï¿½lï¿½yorsa, docker-compose.yml iï¿½indeki ports eï¿½leï¿½tirmelerini 8081:8080 ï¿½eklinde deï¿½iï¿½tirebilirsiniz.
+
 
