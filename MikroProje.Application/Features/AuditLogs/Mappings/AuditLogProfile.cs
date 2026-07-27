@@ -10,5 +10,9 @@ public class AuditLogProfile : Profile
     {
         CreateMap<AuditLog, AuditLogDto>();
         CreateMap<AuditLog, AuditLogListDto>();
+    
+        
     }
 }
+
+

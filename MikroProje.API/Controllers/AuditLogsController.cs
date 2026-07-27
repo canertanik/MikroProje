@@ -1,3 +1,4 @@
+using MikroProje.Application.Features.AuditLogs.Queries.ExportAuditLogsPdf;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -60,4 +61,19 @@ public class AuditLogsController : ControllerBase
         var result = await _mediator.Send(query);
         return StatusCode(result.StatusCode, result);
     }
+    [Authorize(Roles = "Admin")]
+    [HttpGet("export/pdf")]
+    public async Task<IActionResult> ExportPdf([FromQuery] ExportAuditLogsPdfQuery query)
+    {
+        var result = await _mediator.Send(query);
+        if (result.Success)
+        {
+            return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
+        }
+        return BadRequest(result.Message);
+    }
 }
+
+
+
+

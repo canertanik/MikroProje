@@ -26,6 +26,9 @@ public static class DependencyInjection
         services.AddScoped<MikroProje.Application.Interfaces.IAppUserRepository, AppUserRepository>();
         services.AddScoped<MikroProje.Application.Interfaces.IRefreshTokenRepository, RefreshTokenRepository>();
 
+        services.AddScoped<MikroProje.Application.Common.Excel.IExcelExportService, MikroProje.Persistence.Services.ExcelExportService>();
+
         return services;
     }
 }
+

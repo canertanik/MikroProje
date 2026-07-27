@@ -23,5 +23,9 @@ public class SaleProfile : Profile
                 opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : string.Empty))
             .ForMember(dest => dest.ProductCode,
                 opt => opt.MapFrom(src => src.Product != null ? src.Product.Code : string.Empty));
+    
+        
     }
 }
+
+

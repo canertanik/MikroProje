@@ -9,6 +9,8 @@ using MikroProje.Application.Features.Products.DTOs;
 using MikroProje.Application.Features.Products.Queries.GetAllProducts;
 using MikroProje.Application.Features.Products.Queries.GetCriticalStockProducts;
 using MikroProje.Application.Features.Products.Queries.GetProductById;
+using MikroProje.Application.Features.Products.Queries.ExportProductsExcel;
+using MikroProje.Application.Features.Products.Queries.ExportProductsPdf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -94,6 +96,28 @@ public class ProductsController : ControllerBase
     [Authorize(Roles = "Admin")]
     [HttpPost]
     [ProducesResponseType(typeof(Result<ProductDto>), StatusCodes.Status201Created)]
+        [HttpGet("export")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Export([FromQuery] string? search, [FromQuery] bool? criticalOnly, CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new MikroProje.Application.Features.Products.Queries.ExportProductsExcel.ExportProductsExcelQuery
+        {
+            Search = search,
+            CriticalOnly = criticalOnly
+        }, cancellationToken);
+
+        if (result.Success && result.Data != null)
+        {
+            return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
+        }
+
+        return StatusCode(result.StatusCode, result);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost]
+    [ProducesResponseType(typeof(Result<ProductDto>), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreateProductCommand command, CancellationToken cancellationToken)
     {
         try
@@ -155,4 +179,16 @@ public class ProductsController : ControllerBase
                 .ToDictionary(group => group.Key, group => group.Select(error => error.ErrorMessage).ToArray())));
         }
     }
+    [HttpGet("export/pdf")]
+    public async Task<IActionResult> ExportPdf([FromQuery] ExportProductsPdfQuery query)
+    {
+        var result = await _mediator.Send(query);
+        if (result.Success)
+        {
+            return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
+        }
+        return BadRequest(result.Message);
+    }
 }
+
+

@@ -1,3 +1,4 @@
+using MikroProje.Application.Features.Sales.Queries.ExportSalesPdf;
 using FluentValidation;
 using MediatR;
 using MikroProje.Application.Common.Pagination;
@@ -113,6 +114,24 @@ public class SalesController : ControllerBase
     [ProducesResponseType(typeof(Result<SaleDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [HttpGet("export")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Export(CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new MikroProje.Application.Features.Sales.Queries.ExportSalesExcel.ExportSalesExcelQuery(), cancellationToken);
+
+        if (result.Success && result.Data != null)
+        {
+            return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
+        }
+
+        return StatusCode(result.StatusCode, result);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost]
+    [ProducesResponseType(typeof(Result<SaleDto>), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreateSaleCommand command, CancellationToken cancellationToken)
     {
         try
@@ -183,4 +202,17 @@ public class SalesController : ControllerBase
                 .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray())));
         }
     }
+    [HttpGet("export/pdf")]
+    public async Task<IActionResult> ExportPdf([FromQuery] ExportSalesPdfQuery query)
+    {
+        var result = await _mediator.Send(query);
+        if (result.Success)
+        {
+            return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
+        }
+        return BadRequest(result.Message);
+    }
 }
+
+
+

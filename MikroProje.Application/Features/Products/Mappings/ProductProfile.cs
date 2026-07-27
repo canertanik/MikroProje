@@ -13,3 +13,6 @@ public class ProductProfile : Profile
                 options => options.MapFrom(source => source.StockQuantity <= source.CriticalStockQuantity));
     }
 }
+
+
+

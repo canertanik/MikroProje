@@ -16,5 +16,9 @@ public class PurchaseProfile : Profile
 
         CreateMap<Purchase, PurchaseListDto>()
             .ForMember(dest => dest.CurrentAccountName, opt => opt.MapFrom(src => src.CurrentAccount.Name));
+    
+        
     }
 }
+
+

@@ -1,3 +1,4 @@
+using MikroProje.Application.Features.Purchases.Queries.ExportPurchasesPdf;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MikroProje.Application.Common.Pagination;
@@ -52,6 +53,24 @@ public class PurchasesController : ControllerBase
     [ProducesResponseType(typeof(Result<PurchaseDto>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Result<PurchaseDto>), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(Result<PurchaseDto>), StatusCodes.Status422UnprocessableEntity)]
+        [HttpGet("export")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Export(CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new MikroProje.Application.Features.Purchases.Queries.ExportPurchasesExcel.ExportPurchasesExcelQuery(), cancellationToken);
+
+        if (result.Success && result.Data != null)
+        {
+            return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
+        }
+
+        return StatusCode(result.StatusCode, result);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost]
+    [ProducesResponseType(typeof(Result<PurchaseDto>), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreatePurchaseCommand command, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command, cancellationToken);
@@ -63,4 +82,17 @@ public class PurchasesController : ControllerBase
 
         return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result);
     }
+    [HttpGet("export/pdf")]
+    public async Task<IActionResult> ExportPdf([FromQuery] ExportPurchasesPdfQuery query)
+    {
+        var result = await _mediator.Send(query);
+        if (result.Success)
+        {
+            return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
+        }
+        return BadRequest(result.Message);
+    }
 }
+
+
+

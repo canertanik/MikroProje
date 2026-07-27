@@ -1,3 +1,4 @@
+using MikroProje.Application.Features.CurrentAccounts.Queries.ExportCurrentAccountsPdf;
 using FluentValidation;
 using MediatR;
 using MikroProje.Application.Common.Results;
@@ -60,6 +61,24 @@ public class CurrentAccountsController : ControllerBase
     [ProducesResponseType(typeof(Result<CurrentAccountDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [HttpGet("export")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Export(CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new MikroProje.Application.Features.CurrentAccounts.Queries.ExportCurrentAccountsExcel.ExportCurrentAccountsExcelQuery(), cancellationToken);
+
+        if (result.Success && result.Data != null)
+        {
+            return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
+        }
+
+        return StatusCode(result.StatusCode, result);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost]
+    [ProducesResponseType(typeof(Result<CurrentAccountDto>), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreateCurrentAccountCommand command, CancellationToken cancellationToken)
     {
         try
@@ -167,4 +186,17 @@ public class CurrentAccountsController : ControllerBase
             return ValidationProblem(CreateValidationProblemDetails(exception));
         }
     }
+    [HttpGet("export/pdf")]
+    public async Task<IActionResult> ExportPdf([FromQuery] ExportCurrentAccountsPdfQuery query)
+    {
+        var result = await _mediator.Send(query);
+        if (result.Success)
+        {
+            return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
+        }
+        return BadRequest(result.Message);
+    }
 }
+
+
+
