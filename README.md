@@ -147,3 +147,20 @@ Proje, Docker ve Docker Compose kullan�larak tek bir komutla aya�a kald�r�
 - **Port �ak��mas�:** E�er 8080 veya 1433 portlar� ba�ka bir uygulama taraf�ndan kullan�l�yorsa, docker-compose.yml i�indeki ports e�le�tirmelerini 8081:8080 �eklinde de�i�tirebilirsiniz.
 
 
+
+## 🧪 Unit Test ve Code Coverage
+
+Projede **Clean Architecture** prensiplerine uygun, Mocking (Moq) ve akıcı doğrulamalar (FluentAssertions) içeren kapsamlı bir Unit Test altyapısı bulunmaktadır. Testler MikroProje.Tests projesinde yer almaktadır.
+
+Testleri çalıştırmak için:
+
+`ash
+dotnet test
+`
+
+Code Coverage (Kod Kapsamı) raporu almak için:
+
+`ash
+dotnet test --collect:"XPlat Code Coverage"
+`
+Bu komut, TestResults klasörü altında coverage.cobertura.xml dosyası oluşturur.

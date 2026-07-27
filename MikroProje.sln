@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MikroProje.Persistence", "M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MikroProje.Infrastructure", "MikroProje.Infrastructure\MikroProje.Infrastructure.csproj", "{5948A2D7-23C5-4BC1-A4F9-C0C9796D185D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MikroProje.Tests", "MikroProje.Tests\MikroProje.Tests.csproj", "{279A309C-2A11-46AE-A30F-50DF262A58E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{5948A2D7-23C5-4BC1-A4F9-C0C9796D185D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5948A2D7-23C5-4BC1-A4F9-C0C9796D185D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5948A2D7-23C5-4BC1-A4F9-C0C9796D185D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{279A309C-2A11-46AE-A30F-50DF262A58E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{279A309C-2A11-46AE-A30F-50DF262A58E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{279A309C-2A11-46AE-A30F-50DF262A58E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{279A309C-2A11-46AE-A30F-50DF262A58E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
