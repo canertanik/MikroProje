@@ -9,6 +9,8 @@ using MikroProje.Persistence;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<MikroProje.Application.Interfaces.ICurrentUserService, MikroProje.API.Services.CurrentUserService>();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(c =>
@@ -44,6 +46,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
+builder.Services.AddScoped<MikroProje.Application.Interfaces.IApplicationDbContext>(provider => provider.GetRequiredService<MikroProje.Persistence.Contexts.MikroProjeDbContext>());
 builder.Services.AddInfrastructureServices();
 
 // JWT Authentication Configuration
@@ -87,3 +90,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

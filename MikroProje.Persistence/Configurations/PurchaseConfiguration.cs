@@ -37,6 +37,11 @@ public class PurchaseConfiguration : IEntityTypeConfiguration<Purchase>
             .HasForeignKey(x => x.CurrentAccountId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(x => x.Warehouse)
+            .WithMany()
+            .HasForeignKey(x => x.WarehouseId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasMany(x => x.Items)
             .WithOne(x => x.Purchase)
             .HasForeignKey(x => x.PurchaseId)

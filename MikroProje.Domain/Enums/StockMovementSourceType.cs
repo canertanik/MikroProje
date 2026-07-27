@@ -6,5 +6,6 @@ public enum StockMovementSourceType
     Purchase = 2,
     Sale = 3,
     Return = 4,
-    InventoryCount = 5
+    InventoryCount = 5,
+    StockTransfer = 6
 }

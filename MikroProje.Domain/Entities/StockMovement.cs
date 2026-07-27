@@ -3,11 +3,15 @@ using MikroProje.Domain.Enums;
 
 namespace MikroProje.Domain.Entities;
 
-public class StockMovement : BaseEntity
+public class StockMovement : BaseEntity, IAuditIgnore
 {
     public int ProductId { get; set; }
 
     public Product Product { get; set; } = null!;
+
+    public int WarehouseId { get; set; }
+
+    public Warehouse Warehouse { get; set; } = null!;
 
     public StockMovementType MovementType { get; set; }
 

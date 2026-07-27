@@ -27,6 +27,11 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
             .HasForeignKey(x => x.CurrentAccountId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        builder.HasOne(x => x.Warehouse)
+            .WithMany()
+            .HasForeignKey(x => x.WarehouseId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasIndex(x => x.CurrentAccountId);
         builder.HasIndex(x => x.SaleDate);
         builder.HasIndex(x => x.IsDeleted);

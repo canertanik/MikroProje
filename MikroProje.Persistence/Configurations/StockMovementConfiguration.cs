@@ -40,6 +40,11 @@ public class StockMovementConfiguration : IEntityTypeConfiguration<StockMovement
             .HasForeignKey(x => x.ProductId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        builder.HasOne(x => x.Warehouse)
+            .WithMany()
+            .HasForeignKey(x => x.WarehouseId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.ToTable(tableBuilder =>
         {
             tableBuilder.HasCheckConstraint("CK_StockMovements_Quantity_Positive", "[Quantity] > 0");

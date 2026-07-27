@@ -24,5 +24,7 @@ public class Product : BaseEntity
 
     public ICollection<StockMovement> StockMovements { get; set; } = new List<StockMovement>();
 
+    public ICollection<ProductWarehouseStock> ProductWarehouseStocks { get; set; } = new List<ProductWarehouseStock>();
+
     public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }

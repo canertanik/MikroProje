@@ -8,6 +8,10 @@ public class Purchase : BaseEntity
 
     public CurrentAccount CurrentAccount { get; set; } = null!;
 
+    public int WarehouseId { get; set; }
+
+    public Warehouse Warehouse { get; set; } = null!;
+
     public DateTime PurchaseDate { get; set; } = DateTime.UtcNow;
 
     public decimal Subtotal { get; set; }
