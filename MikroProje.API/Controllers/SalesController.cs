@@ -1,4 +1,4 @@
-﻿using MikroProje.Application.Features.Sales.Queries.ExportSalesPdf;
+using MikroProje.Application.Features.Sales.Queries.ExportSalesPdf;
 using FluentValidation;
 using MediatR;
 using MikroProje.Application.Common.Pagination;
@@ -202,7 +202,7 @@ public class SalesController : ControllerBase
     public async Task<IActionResult> ExportPdf([FromQuery] ExportSalesPdfQuery query)
     {
         var result = await _mediator.Send(query);
-        if (result.Success)
+        if (result.Success && result.Data != null)
         {
             return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
         }

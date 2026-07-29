@@ -1,4 +1,4 @@
-﻿using MikroProje.Application.Features.CurrentAccounts.Queries.ExportCurrentAccountsPdf;
+using MikroProje.Application.Features.CurrentAccounts.Queries.ExportCurrentAccountsPdf;
 using FluentValidation;
 using MediatR;
 using MikroProje.Application.Common.Results;
@@ -186,7 +186,7 @@ public class CurrentAccountsController : ControllerBase
     public async Task<IActionResult> ExportPdf([FromQuery] ExportCurrentAccountsPdfQuery query)
     {
         var result = await _mediator.Send(query);
-        if (result.Success)
+        if (result.Success && result.Data != null)
         {
             return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
         }

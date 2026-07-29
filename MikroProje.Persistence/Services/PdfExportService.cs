@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -71,7 +71,7 @@ public class PdfExportService : IPdfExportService
             {
                 column.Item().Text("MikroProje ERP").FontSize(20).SemiBold().FontColor(Colors.Blue.Darken2);
                 column.Item().Text(title).FontSize(14);
-                column.Item().Text($"Oluþturulma Tarihi: {DateTime.Now:dd.MM.yyyy HH:mm}").FontSize(10);
+                column.Item().Text($"Oluï¿½turulma Tarihi: {DateTime.Now:dd.MM.yyyy HH:mm}").FontSize(10);
             });
         });
     }
@@ -169,11 +169,11 @@ public class PdfExportService : IPdfExportService
         }
         else if (type.Name == "DateOnly")
         {
-            return value.ToString();
+            return value.ToString() ?? string.Empty;
         }
         else if (type == typeof(bool))
         {
-            return ((bool)value) ? "Evet" : "Hayýr";
+            return ((bool)value) ? "Evet" : "Hayï¿½r";
         }
         else if (type == typeof(decimal) || type == typeof(double) || type == typeof(float))
         {

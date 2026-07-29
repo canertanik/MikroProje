@@ -1,4 +1,4 @@
-﻿using MikroProje.Application.Features.Purchases.Queries.ExportPurchasesPdf;
+using MikroProje.Application.Features.Purchases.Queries.ExportPurchasesPdf;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MikroProje.Application.Common.Pagination;
@@ -80,7 +80,7 @@ public class PurchasesController : ControllerBase
     public async Task<IActionResult> ExportPdf([FromQuery] ExportPurchasesPdfQuery query)
     {
         var result = await _mediator.Send(query);
-        if (result.Success)
+        if (result.Success && result.Data != null)
         {
             return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
         }

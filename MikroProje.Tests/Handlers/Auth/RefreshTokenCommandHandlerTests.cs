@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -59,8 +59,9 @@ public class RefreshTokenCommandHandlerTests : TestBase
 
         result.Success.Should().BeTrue();
         result.StatusCode.Should().Be(200);
-        result.Data.AccessToken.Should().Be("new-access");
-        result.Data.RefreshToken.Should().Be("new-refresh");
+        result.Data.Should().NotBeNull();
+        result.Data!.AccessToken.Should().Be("new-access");
+        result.Data!.RefreshToken.Should().Be("new-refresh");
     }
 
     [Fact]

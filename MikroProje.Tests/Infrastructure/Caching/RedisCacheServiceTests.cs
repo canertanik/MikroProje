@@ -145,9 +145,9 @@ public class RedisCacheServiceTests
 
         Func<Task> act = async () =>
         {
-            await _cacheService.GetOrCreateAsync<TestData>(key, async (ct) =>
+            await _cacheService.GetOrCreateAsync<TestData>(key, (ct) =>
             {
-                throw new Exception("Factory error");
+                return Task.FromException<TestData>(new Exception("Factory error"));
             }, TimeSpan.FromMinutes(5));
         };
 

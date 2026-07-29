@@ -66,7 +66,7 @@ public class AuditLogsController : ControllerBase
     public async Task<IActionResult> ExportPdf([FromQuery] ExportAuditLogsPdfQuery query)
     {
         var result = await _mediator.Send(query);
-        if (result.Success)
+        if (result.Success && result.Data != null)
         {
             return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
         }

@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using Moq.EntityFrameworkCore;
 using MikroProje.Application.Features.AuditLogs.Queries.GetAllAuditLogs;
@@ -52,8 +52,9 @@ public class GetAllAuditLogsQueryHandlerTests : TestBase
         var result = await _handler.Handle(query, CancellationToken.None);
 
         result.Success.Should().BeTrue();
-        result.Data.Items.Should().HaveCount(1);
-        result.Data.Items.First().EntityName.Should().Be("User");
+        result.Data.Should().NotBeNull();
+        result.Data!.Items.Should().HaveCount(1);
+        result.Data!.Items.First().EntityName.Should().Be("User");
     }
 }
 

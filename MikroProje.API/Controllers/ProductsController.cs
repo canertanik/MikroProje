@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using MediatR;
 using MikroProje.Application.Common.Pagination;
 using MikroProje.Application.Common.Results;
@@ -181,7 +181,7 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> ExportPdf([FromQuery] ExportProductsPdfQuery query)
     {
         var result = await _mediator.Send(query);
-        if (result.Success)
+        if (result.Success && result.Data != null)
         {
             return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
         }
