@@ -17,13 +17,14 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Resul
     private readonly IProductRepository _productRepository;
     private readonly IWarehouseRepository _warehouseRepository;
     private readonly IMapper _mapper;
+    private readonly IApplicationMetrics? _metrics;
 
     public CreateSaleCommandHandler(
         ISaleRepository saleRepository,
         ICurrentAccountRepository currentAccountRepository,
         IProductRepository productRepository,
         IWarehouseRepository warehouseRepository,
-        IMapper mapper, ICacheService cacheService)
+        IMapper mapper, ICacheService cacheService, IApplicationMetrics? metrics = null)
     {
         _cacheService = cacheService;
         _saleRepository = saleRepository;
@@ -31,6 +32,7 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Resul
         _productRepository = productRepository;
         _warehouseRepository = warehouseRepository;
         _mapper = mapper;
+        _metrics = metrics;
     }
 
     public async Task<Result<SaleDto>> Handle(CreateSaleCommand request, CancellationToken cancellationToken)
@@ -106,6 +108,8 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Resul
             
             // Dashboard cache'i temizle — satış sonrası güncel veriler gösterilmeli
             await _cacheService.RemoveByPrefixAsync(CacheKeys.DashboardPrefix, cancellationToken);
+            
+            _metrics?.IncrementSalesCreated(1);
             
             var dto = _mapper.Map<SaleDto>(created);
             return Result<SaleDto>.Created(dto, "Satış başarıyla oluşturuldu.");

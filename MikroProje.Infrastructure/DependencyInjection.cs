@@ -40,6 +40,7 @@ public static class DependencyInjection
         }
 
         services.AddScoped<ICacheService, RedisCacheService>();
+        services.AddSingleton<IApplicationMetrics, MikroProje.Infrastructure.Observability.MikroProjeMetrics>();
 
         return services;
     }

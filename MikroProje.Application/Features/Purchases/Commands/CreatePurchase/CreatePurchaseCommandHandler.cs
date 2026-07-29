@@ -18,13 +18,14 @@ public class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchaseComman
     private readonly IProductRepository _productRepository;
     private readonly IWarehouseRepository _warehouseRepository;
     private readonly IMapper _mapper;
+    private readonly IApplicationMetrics? _metrics;
 
     public CreatePurchaseCommandHandler(
         IPurchaseRepository purchaseRepository,
         ICurrentAccountRepository currentAccountRepository,
         IProductRepository productRepository,
         IWarehouseRepository warehouseRepository,
-        IMapper mapper, ICacheService cacheService)
+        IMapper mapper, ICacheService cacheService, IApplicationMetrics? metrics = null)
     {
         _cacheService = cacheService;
         _purchaseRepository = purchaseRepository;
@@ -32,6 +33,7 @@ public class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchaseComman
         _productRepository = productRepository;
         _warehouseRepository = warehouseRepository;
         _mapper = mapper;
+        _metrics = metrics;
     }
 
     public async Task<Result<PurchaseDto>> Handle(CreatePurchaseCommand request, CancellationToken cancellationToken)
@@ -121,6 +123,8 @@ public class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchaseComman
             
             // Dashboard cache'i temizle — alış sonrası güncel veriler gösterilmeli
             await _cacheService.RemoveByPrefixAsync(CacheKeys.DashboardPrefix, cancellationToken);
+            
+            _metrics?.IncrementPurchasesCreated(1);
             
             var dto = _mapper.Map<PurchaseDto>(created);
             return Result<PurchaseDto>.Created(dto, "Satın alma işlemi başarıyla tamamlandı.");

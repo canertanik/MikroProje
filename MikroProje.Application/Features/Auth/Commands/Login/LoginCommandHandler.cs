@@ -14,19 +14,22 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<AuthResp
     private readonly ITokenService _tokenService;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IConfiguration _configuration;
+    private readonly IApplicationMetrics? _metrics;
 
     public LoginCommandHandler(
         IAppUserRepository userRepository,
         IPasswordHasher passwordHasher,
         ITokenService tokenService,
         IRefreshTokenRepository refreshTokenRepository,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IApplicationMetrics? metrics = null)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
         _refreshTokenRepository = refreshTokenRepository;
         _configuration = configuration;
+        _metrics = metrics;
     }
 
     public async Task<Result<AuthResponseDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -36,11 +39,13 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<AuthResp
         // Same error message for user not found and invalid password to prevent email enumeration
         if (user == null || !_passwordHasher.VerifyPassword(request.Request.Password, user.PasswordHash))
         {
+            _metrics?.IncrementFailedLogins(1);
             return Result<AuthResponseDto>.Fail("Geçersiz e-posta veya parola.", 401);
         }
 
         if (!user.IsActive)
         {
+            _metrics?.IncrementFailedLogins(1);
             return Result<AuthResponseDto>.Fail("Hesabınız pasife alınmış.", 401);
         }
 

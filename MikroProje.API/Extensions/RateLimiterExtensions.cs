@@ -70,6 +70,11 @@ public static class RateLimiterExtensions
             options.OnRejected = async (context, token) =>
             {
                 var rateLimitingOptions = context.HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Options.IOptions<RateLimitingOptions>>().Value;
+                var metrics = context.HttpContext.RequestServices.GetService<MikroProje.Application.Interfaces.IApplicationMetrics>();
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("RateLimiter");
+
+                metrics?.IncrementRateLimitRejections(1);
+                logger.LogWarning("Rate limit exceeded for path {Path}", context.HttpContext.Request.Path.Value);
 
                 context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
                 context.HttpContext.Response.ContentType = "application/problem+json";

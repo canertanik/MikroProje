@@ -9,8 +9,11 @@ using MikroProje.Application;
 using MikroProje.Infrastructure;
 using MikroProje.Persistence;
 using MikroProje.API.Extensions;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddCustomObservability(builder);
 
 builder.Services.AddHealthChecks().AddDbContextCheck<MikroProje.Persistence.Contexts.MikroProjeDbContext>();
 builder.Services.AddControllers();
@@ -87,6 +90,28 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseSerilogRequestLogging(options =>
+{
+    options.GetLevel = (httpContext, elapsed, ex) =>
+    {
+        // Eğer exception Serilog'a kadar ulaştıysa (yakalanmadıysa) Error logla.
+        if (ex != null) return LogEventLevel.Error;
+        
+        // Middleware tarafından yakalanıp 500 dönüldüyse, exception zaten middleware'de loglandı.
+        // Serilog request özetini sadece Information veya Warning olarak loglasın, böylece duplicate Error oluşmaz.
+        if (httpContext.Response.StatusCode > 499) return LogEventLevel.Warning;
+        if (httpContext.Response.StatusCode > 399) return LogEventLevel.Warning;
+
+        var path = httpContext.Request.Path.Value;
+        if (path != null && (path.StartsWith("/swagger") || path.StartsWith("/health")))
+        {
+            return LogEventLevel.Debug; // Filtrele
+        }
+
+        return LogEventLevel.Information;
+    };
+});
 
 app.UseMiddleware<MikroProje.API.Middlewares.GlobalExceptionMiddleware>();
 

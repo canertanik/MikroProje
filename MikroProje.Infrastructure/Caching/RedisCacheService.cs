@@ -15,6 +15,7 @@ public class RedisCacheService : ICacheService
     private readonly IConnectionMultiplexer? _connectionMultiplexer;
     private readonly ILogger<RedisCacheService> _logger;
     private readonly RedisOptions _options;
+    private readonly IApplicationMetrics? _metrics;
     
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> _semaphores = new();
 
@@ -22,12 +23,14 @@ public class RedisCacheService : ICacheService
         IDistributedCache cache,
         ILogger<RedisCacheService> logger,
         IOptions<RedisOptions> options,
-        IConnectionMultiplexer? connectionMultiplexer = null)
+        IConnectionMultiplexer? connectionMultiplexer = null,
+        IApplicationMetrics? metrics = null)
     {
         _cache = cache;
         _logger = logger;
         _options = options.Value;
         _connectionMultiplexer = connectionMultiplexer;
+        _metrics = metrics;
     }
 
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
@@ -54,6 +57,7 @@ public class RedisCacheService : ICacheService
         var cachedValue = await GetAsync<T>(key, cancellationToken);
         if (cachedValue is not null)
         {
+            if (key.StartsWith(CacheKeys.DashboardPrefix)) _metrics?.IncrementDashboardCacheHits(1);
             return cachedValue;
         }
 
@@ -67,8 +71,11 @@ public class RedisCacheService : ICacheService
             cachedValue = await GetAsync<T>(key, cancellationToken);
             if (cachedValue is not null)
             {
+                if (key.StartsWith(CacheKeys.DashboardPrefix)) _metrics?.IncrementDashboardCacheHits(1);
                 return cachedValue;
             }
+
+            if (key.StartsWith(CacheKeys.DashboardPrefix)) _metrics?.IncrementDashboardCacheMisses(1);
 
             // 3. Execute factory
             var value = await factory(cancellationToken);

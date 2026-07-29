@@ -59,6 +59,26 @@ public class GlobalExceptionMiddleware
 
             await context.Response.WriteAsync(result);
         }
-        // Diğer hatalar uygulamanın mevcut exception handler'ına (DeveloperExceptionPage) gitmeye devam eder.
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unhandled exception occurred.");
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            context.Response.ContentType = "application/problem+json";
+
+            // TraceId is already added by OpenTelemetry and Serilog (as trace_id). 
+            // We can fetch Activity.Current?.Id as TraceId
+            var traceId = System.Diagnostics.Activity.Current?.Id ?? context.TraceIdentifier;
+
+            var result = JsonSerializer.Serialize(new
+            {
+                type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
+                title = "An unexpected error occurred.",
+                status = StatusCodes.Status500InternalServerError,
+                detail = "İşleminiz sırasında beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.",
+                traceId = traceId
+            });
+
+            await context.Response.WriteAsync(result);
+        }
     }
 }
