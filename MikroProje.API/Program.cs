@@ -89,7 +89,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Development ortamında sadece HTTPS tanımlıysa (veya Production/Docker ortamındaysa) yönlendirme yap
+var urls = builder.Configuration["ASPNETCORE_URLS"];
+var httpsPorts = builder.Configuration["ASPNETCORE_HTTPS_PORTS"];
+var httpsPort = builder.Configuration["ASPNETCORE_HTTPS_PORT"];
+var hasHttps = (urls != null && urls.Contains("https://", StringComparison.OrdinalIgnoreCase)) ||
+               !string.IsNullOrEmpty(httpsPorts) ||
+               !string.IsNullOrEmpty(httpsPort);
+
+if (!app.Environment.IsDevelopment() || hasHttps)
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseSerilogRequestLogging(options =>
 {
