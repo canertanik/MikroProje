@@ -51,7 +51,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddScoped<MikroProje.Application.Interfaces.IApplicationDbContext>(provider => provider.GetRequiredService<MikroProje.Persistence.Contexts.MikroProjeDbContext>());
-builder.Services.AddInfrastructureServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // JWT Authentication Configuration
 builder.Services.AddAuthentication(options =>

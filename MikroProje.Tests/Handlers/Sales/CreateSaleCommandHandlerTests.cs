@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Features.Sales.Commands.CreateSale;
@@ -11,22 +11,28 @@ namespace MikroProje.Tests.Handlers.Sales;
 
 public class CreateSaleCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<ISaleRepository> _saleRepoMock;
     private readonly Mock<ICurrentAccountRepository> _accountRepoMock;
     private readonly Mock<IProductRepository> _productRepoMock;
+    private readonly Mock<IWarehouseRepository> _warehouseRepoMock;
     private readonly CreateSaleCommandHandler _handler;
 
     public CreateSaleCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _saleRepoMock = new Mock<ISaleRepository>();
         _accountRepoMock = new Mock<ICurrentAccountRepository>();
         _productRepoMock = new Mock<IProductRepository>();
+        _warehouseRepoMock = new Mock<IWarehouseRepository>();
         
         _handler = new CreateSaleCommandHandler(
             _saleRepoMock.Object, 
             _accountRepoMock.Object, 
             _productRepoMock.Object, 
-            Mapper);
+            _warehouseRepoMock.Object,
+            Mapper, 
+            _cacheServiceMock.Object);
     }
 
     [Fact]
@@ -36,6 +42,7 @@ public class CreateSaleCommandHandlerTests : TestBase
         var command = new CreateSaleCommand
         {
             CurrentAccountId = 1,
+            WarehouseId = 1,
             Items = new List<SaleItemDto>
             {
                 new() { ProductId = 1, Quantity = 2, UnitPrice = 50, Discount = 0 }
@@ -44,9 +51,13 @@ public class CreateSaleCommandHandlerTests : TestBase
 
         var account = new CurrentAccount { Id = command.CurrentAccountId };
         var product = new Product { Id = command.Items[0].ProductId, StockQuantity = 10, SalePrice = 50, VatRate = 18 };
+        var warehouse = new Warehouse { Id = 1, IsActive = true, Name = "Main" };
 
         _accountRepoMock.Setup(r => r.GetByIdAsync(command.CurrentAccountId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(account);
+
+        _warehouseRepoMock.Setup(r => r.GetByIdAsync(command.WarehouseId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(warehouse);
 
         _productRepoMock.Setup(r => r.GetByIdAsync(command.Items[0].ProductId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(product);
@@ -119,6 +130,7 @@ public class CreateSaleCommandHandlerTests : TestBase
         var command = new CreateSaleCommand
         {
             CurrentAccountId = 1,
+            WarehouseId = 1,
             Items = new List<SaleItemDto>
             {
                 new() { ProductId = 1, Quantity = 5 }
@@ -127,9 +139,13 @@ public class CreateSaleCommandHandlerTests : TestBase
 
         var account = new CurrentAccount { Id = command.CurrentAccountId };
         var product = new Product { Id = command.Items[0].ProductId, StockQuantity = 2 }; // Less than requested
+        var warehouse = new Warehouse { Id = 1, IsActive = true, Name = "Main" };
 
         _accountRepoMock.Setup(r => r.GetByIdAsync(command.CurrentAccountId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(account);
+            
+        _warehouseRepoMock.Setup(r => r.GetByIdAsync(command.WarehouseId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(warehouse);
 
         _productRepoMock.Setup(r => r.GetByIdAsync(command.Items[0].ProductId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(product);
@@ -150,6 +166,7 @@ public class CreateSaleCommandHandlerTests : TestBase
         var command = new CreateSaleCommand
         {
             CurrentAccountId = 1,
+            WarehouseId = 1,
             Items = new List<SaleItemDto>
             {
                 new() { ProductId = 1, Quantity = 1 }
@@ -158,9 +175,13 @@ public class CreateSaleCommandHandlerTests : TestBase
 
         var account = new CurrentAccount { Id = command.CurrentAccountId };
         var product = new Product { Id = command.Items[0].ProductId, StockQuantity = 10 };
+        var warehouse = new Warehouse { Id = 1, IsActive = true, Name = "Main" };
 
         _accountRepoMock.Setup(r => r.GetByIdAsync(command.CurrentAccountId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(account);
+            
+        _warehouseRepoMock.Setup(r => r.GetByIdAsync(command.WarehouseId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(warehouse);
 
         _productRepoMock.Setup(r => r.GetByIdAsync(command.Items[0].ProductId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(product);
@@ -176,6 +197,29 @@ public class CreateSaleCommandHandlerTests : TestBase
         result.StatusCode.Should().Be(409);
         result.Message.Should().Contain("zaman");
     }
-}
+    [Fact]
+    public async Task Handle_ShouldReturn404_WhenWarehouseNotFound()
+    {
+        var command = new CreateSaleCommand { CurrentAccountId = 1, WarehouseId = 99, Items = new List<SaleItemDto> { new() { ProductId = 1, Quantity = 1 } } };
+        var account = new CurrentAccount { Id = 1 };
+        _accountRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(account);
+        _warehouseRepoMock.Setup(x => x.GetByIdAsync(99, It.IsAny<CancellationToken>())).ReturnsAsync((Warehouse?)null);
+        var result = await _handler.Handle(command, CancellationToken.None);
+        Assert.False(result.Success);
+        Assert.Equal(404, result.StatusCode);
+    }
 
+    [Fact]
+    public async Task Handle_ShouldReturn422_WhenWarehouseIsPassive()
+    {
+        var command = new CreateSaleCommand { CurrentAccountId = 1, WarehouseId = 2, Items = new List<SaleItemDto> { new() { ProductId = 1, Quantity = 1 } } };
+        var account = new CurrentAccount { Id = 1 };
+        var warehouse = new Warehouse { Id = 2, IsActive = false, Name = "Passive" };
+        _accountRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(account);
+        _warehouseRepoMock.Setup(x => x.GetByIdAsync(2, It.IsAny<CancellationToken>())).ReturnsAsync(warehouse);
+        var result = await _handler.Handle(command, CancellationToken.None);
+        Assert.False(result.Success);
+        Assert.Equal(422, result.StatusCode);
+    }
+}
 

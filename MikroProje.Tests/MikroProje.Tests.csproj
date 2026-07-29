@@ -26,6 +26,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MikroProje.Application\MikroProje.Application.csproj" />
     <ProjectReference Include="..\MikroProje.Domain\MikroProje.Domain.csproj" />
+    <ProjectReference Include="..\MikroProje.Infrastructure\MikroProje.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

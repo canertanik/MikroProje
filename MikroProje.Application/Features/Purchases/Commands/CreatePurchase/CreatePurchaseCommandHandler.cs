@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Features.Purchases.DTOs;
@@ -11,20 +12,25 @@ namespace MikroProje.Application.Features.Purchases.Commands.CreatePurchase;
 
 public class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchaseCommand, Result<PurchaseDto>>
 {
+    private readonly ICacheService _cacheService;
     private readonly IPurchaseRepository _purchaseRepository;
     private readonly ICurrentAccountRepository _currentAccountRepository;
     private readonly IProductRepository _productRepository;
+    private readonly IWarehouseRepository _warehouseRepository;
     private readonly IMapper _mapper;
 
     public CreatePurchaseCommandHandler(
         IPurchaseRepository purchaseRepository,
         ICurrentAccountRepository currentAccountRepository,
         IProductRepository productRepository,
-        IMapper mapper)
+        IWarehouseRepository warehouseRepository,
+        IMapper mapper, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _purchaseRepository = purchaseRepository;
         _currentAccountRepository = currentAccountRepository;
         _productRepository = productRepository;
+        _warehouseRepository = warehouseRepository;
         _mapper = mapper;
     }
 
@@ -40,6 +46,17 @@ public class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchaseComman
         if (currentAccount.Type != CurrentAccountType.Supplier)
         {
             return Result<PurchaseDto>.Fail($"Seçilen cari hesap ({currentAccount.Name}) bir Tedarikçi değil.", 400);
+        }
+
+        // 1.5. Warehouse doğrulama
+        var warehouse = await _warehouseRepository.GetByIdAsync(request.WarehouseId, cancellationToken);
+        if (warehouse is null)
+        {
+            return Result<PurchaseDto>.Fail($"Depo (Id={request.WarehouseId}) bulunamadı.", 404);
+        }
+        if (!warehouse.IsActive)
+        {
+            return Result<PurchaseDto>.Fail($"Depo '{warehouse.Name}' pasif durumda. İşlem yapılamaz.", 422);
         }
 
         // 2. Ürün ve satır hesaplamaları
@@ -88,6 +105,7 @@ public class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchaseComman
         var purchase = new Purchase
         {
             CurrentAccountId = request.CurrentAccountId,
+            WarehouseId = request.WarehouseId,
             PurchaseDate = purchaseDate,
             Subtotal = Math.Round(subtotal, 2),
             VatAmount = Math.Round(vatAmount, 2),
@@ -100,6 +118,10 @@ public class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchaseComman
         try
         {
             var created = await _purchaseRepository.CreatePurchaseAsync(purchase, lineItems, currentAccount, cancellationToken);
+            
+            // Dashboard cache'i temizle — alış sonrası güncel veriler gösterilmeli
+            await _cacheService.RemoveByPrefixAsync(CacheKeys.DashboardPrefix, cancellationToken);
+            
             var dto = _mapper.Map<PurchaseDto>(created);
             return Result<PurchaseDto>.Created(dto, "Satın alma işlemi başarıyla tamamlandı.");
         }

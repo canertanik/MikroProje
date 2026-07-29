@@ -1,4 +1,4 @@
-﻿[![MikroProje CI](https://github.com/canertanik/MikroProje/actions/workflows/ci.yml/badge.svg)](https://github.com/canertanik/MikroProje/actions/workflows/ci.yml)
+[![MikroProje CI](https://github.com/canertanik/MikroProje/actions/workflows/ci.yml/badge.svg)](https://github.com/canertanik/MikroProje/actions/workflows/ci.yml)
 
 \# MikroProje ERP
 
@@ -160,7 +160,12 @@ dotnet test
 
 Code Coverage (Kod Kapsamı) raporu almak için:
 
-`ash
+` ash
 dotnet test --collect:"XPlat Code Coverage"
 `
 Bu komut, TestResults klasörü altında coverage.cobertura.xml dosyası oluşturur.
+
+**Güncel Test Metrikleri:**
+- Toplam Test Sayısı: 147
+- Application Line Coverage: %76.66
+- Application Branch Coverage: %69.42

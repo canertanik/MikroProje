@@ -9,7 +9,8 @@ public class PurchaseProfile : Profile
     public PurchaseProfile()
     {
         CreateMap<Purchase, PurchaseDto>()
-            .ForMember(dest => dest.CurrentAccountName, opt => opt.MapFrom(src => src.CurrentAccount.Name));
+            .ForMember(dest => dest.CurrentAccountName, opt => opt.MapFrom(src => src.CurrentAccount.Name))
+            .ForMember(dest => dest.WarehouseName, opt => opt.MapFrom(src => src.Warehouse != null ? src.Warehouse.Name : string.Empty));
 
         CreateMap<PurchaseItem, PurchaseItemDto>()
             .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name));

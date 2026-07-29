@@ -1,5 +1,6 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Features.CurrentAccounts.Commands.UpdateCurrentAccount;
 using MikroProje.Application.Interfaces;
 using MikroProje.Domain.Entities;
@@ -9,13 +10,15 @@ namespace MikroProje.Tests.Handlers.CurrentAccounts;
 
 public class UpdateCurrentAccountCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<ICurrentAccountRepository> _repositoryMock;
     private readonly UpdateCurrentAccountCommandHandler _handler;
 
     public UpdateCurrentAccountCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _repositoryMock = new Mock<ICurrentAccountRepository>();
-        _handler = new UpdateCurrentAccountCommandHandler(_repositoryMock.Object, Mapper);
+        _handler = new UpdateCurrentAccountCommandHandler(_repositoryMock.Object, Mapper, _cacheServiceMock.Object);
     }
 
     [Fact]

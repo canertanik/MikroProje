@@ -14,6 +14,8 @@ public class SaleProfile : Profile
                 opt => opt.MapFrom(src => src.CurrentAccount != null ? src.CurrentAccount.Name : string.Empty))
             .ForMember(dest => dest.CurrentAccountCode,
                 opt => opt.MapFrom(src => src.CurrentAccount != null ? src.CurrentAccount.Code : string.Empty))
+            .ForMember(dest => dest.WarehouseName,
+                opt => opt.MapFrom(src => src.Warehouse != null ? src.Warehouse.Name : string.Empty))
             .ForMember(dest => dest.Items,
                 opt => opt.MapFrom(src => src.Details));
 

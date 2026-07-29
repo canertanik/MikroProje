@@ -8,6 +8,10 @@ public class SaleDto
 
     public string CurrentAccountName { get; set; } = string.Empty;
 
+    public int WarehouseId { get; set; }
+
+    public string WarehouseName { get; set; } = string.Empty;
+
     public string CurrentAccountCode { get; set; } = string.Empty;
 
     public DateTime SaleDate { get; set; }

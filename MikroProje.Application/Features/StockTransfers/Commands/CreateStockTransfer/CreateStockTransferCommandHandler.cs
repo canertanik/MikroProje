@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Interfaces;
 using MikroProje.Domain.Entities;
@@ -10,13 +11,15 @@ namespace MikroProje.Application.Features.StockTransfers.Commands.CreateStockTra
 
 public class CreateStockTransferCommandHandler : IRequestHandler<CreateStockTransferCommand, Result<StockTransferDto>>
 {
+    private readonly ICacheService _cacheService;
     private readonly IStockTransferRepository _repository;
     private readonly IWarehouseRepository _warehouseRepository;
     private readonly IProductRepository _productRepository;
     private readonly IMapper _mapper;
 
-    public CreateStockTransferCommandHandler(IStockTransferRepository repository, IWarehouseRepository warehouseRepository, IProductRepository productRepository, IMapper mapper)
+    public CreateStockTransferCommandHandler(IStockTransferRepository repository, IWarehouseRepository warehouseRepository, IProductRepository productRepository, IMapper mapper, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _repository = repository;
         _warehouseRepository = warehouseRepository;
         _productRepository = productRepository;

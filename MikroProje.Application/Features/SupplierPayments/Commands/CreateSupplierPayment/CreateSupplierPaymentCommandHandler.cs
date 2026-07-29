@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Features.SupplierPayments.DTOs;
 using MikroProje.Application.Interfaces;
@@ -10,6 +11,7 @@ namespace MikroProje.Application.Features.SupplierPayments.Commands.CreateSuppli
 
 public class CreateSupplierPaymentCommandHandler : IRequestHandler<CreateSupplierPaymentCommand, Result<SupplierPaymentDto>>
 {
+    private readonly ICacheService _cacheService;
     private readonly ISupplierPaymentRepository _supplierPaymentRepository;
     private readonly ICurrentAccountRepository _currentAccountRepository;
     private readonly IMapper _mapper;
@@ -17,8 +19,9 @@ public class CreateSupplierPaymentCommandHandler : IRequestHandler<CreateSupplie
     public CreateSupplierPaymentCommandHandler(
         ISupplierPaymentRepository supplierPaymentRepository,
         ICurrentAccountRepository currentAccountRepository,
-        IMapper mapper)
+        IMapper mapper, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _supplierPaymentRepository = supplierPaymentRepository;
         _currentAccountRepository = currentAccountRepository;
         _mapper = mapper;

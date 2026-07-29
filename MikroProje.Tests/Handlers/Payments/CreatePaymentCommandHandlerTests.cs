@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Features.Payments.Commands.CreatePayment;
 using MikroProje.Application.Interfaces;
 using MikroProje.Domain.Entities;
@@ -10,15 +11,17 @@ namespace MikroProje.Tests.Handlers.Payments;
 
 public class CreatePaymentCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<IPaymentRepository> _paymentRepositoryMock;
     private readonly Mock<ICurrentAccountRepository> _currentAccountRepositoryMock;
     private readonly CreatePaymentCommandHandler _handler;
 
     public CreatePaymentCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _paymentRepositoryMock = new Mock<IPaymentRepository>();
         _currentAccountRepositoryMock = new Mock<ICurrentAccountRepository>();
-        _handler = new CreatePaymentCommandHandler(_paymentRepositoryMock.Object, _currentAccountRepositoryMock.Object, Mapper);
+        _handler = new CreatePaymentCommandHandler(_paymentRepositoryMock.Object, _currentAccountRepositoryMock.Object, Mapper, _cacheServiceMock.Object);
     }
 
     [Fact]

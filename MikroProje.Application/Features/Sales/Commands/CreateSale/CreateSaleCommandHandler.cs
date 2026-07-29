@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Features.Sales.DTOs;
@@ -10,20 +11,25 @@ namespace MikroProje.Application.Features.Sales.Commands.CreateSale;
 
 public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Result<SaleDto>>
 {
+    private readonly ICacheService _cacheService;
     private readonly ISaleRepository _saleRepository;
     private readonly ICurrentAccountRepository _currentAccountRepository;
     private readonly IProductRepository _productRepository;
+    private readonly IWarehouseRepository _warehouseRepository;
     private readonly IMapper _mapper;
 
     public CreateSaleCommandHandler(
         ISaleRepository saleRepository,
         ICurrentAccountRepository currentAccountRepository,
         IProductRepository productRepository,
-        IMapper mapper)
+        IWarehouseRepository warehouseRepository,
+        IMapper mapper, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _saleRepository = saleRepository;
         _currentAccountRepository = currentAccountRepository;
         _productRepository = productRepository;
+        _warehouseRepository = warehouseRepository;
         _mapper = mapper;
     }
 
@@ -34,6 +40,17 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Resul
         if (currentAccount is null)
         {
             return Result<SaleDto>.Fail($"CurrentAccount (Id={request.CurrentAccountId}) bulunamadı veya silinmiş.", 404);
+        }
+
+        // 1.5. Warehouse kontrolü
+        var warehouse = await _warehouseRepository.GetByIdAsync(request.WarehouseId, cancellationToken);
+        if (warehouse is null)
+        {
+            return Result<SaleDto>.Fail($"Depo (Id={request.WarehouseId}) bulunamadı.", 404);
+        }
+        if (!warehouse.IsActive)
+        {
+            return Result<SaleDto>.Fail($"Depo '{warehouse.Name}' pasif durumda. İşlem yapılamaz.", 422);
         }
 
         // 2. Her ürünü validate et ve satır hesaplarını yap
@@ -73,6 +90,7 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Resul
         var sale = new Sale
         {
             CurrentAccountId = request.CurrentAccountId,
+            WarehouseId = request.WarehouseId,
             SaleDate = DateTime.UtcNow,
             TotalAmount = Math.Round(totalAmount, 2),
             VatAmount = Math.Round(vatAmount, 2),
@@ -85,6 +103,10 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Resul
         try
         {
             var created = await _saleRepository.CreateSaleAsync(sale, lineItems, currentAccount, cancellationToken);
+            
+            // Dashboard cache'i temizle — satış sonrası güncel veriler gösterilmeli
+            await _cacheService.RemoveByPrefixAsync(CacheKeys.DashboardPrefix, cancellationToken);
+            
             var dto = _mapper.Map<SaleDto>(created);
             return Result<SaleDto>.Created(dto, "Satış başarıyla oluşturuldu.");
         }

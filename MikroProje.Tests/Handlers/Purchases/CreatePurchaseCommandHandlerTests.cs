@@ -1,5 +1,6 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Features.Purchases.Commands.CreatePurchase;
 using MikroProje.Application.Features.Purchases.DTOs;
@@ -12,22 +13,28 @@ namespace MikroProje.Tests.Handlers.Purchases;
 
 public class CreatePurchaseCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<IPurchaseRepository> _purchaseRepoMock;
     private readonly Mock<ICurrentAccountRepository> _accountRepoMock;
     private readonly Mock<IProductRepository> _productRepoMock;
+    private readonly Mock<IWarehouseRepository> _warehouseRepoMock;
     private readonly CreatePurchaseCommandHandler _handler;
 
     public CreatePurchaseCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _purchaseRepoMock = new Mock<IPurchaseRepository>();
         _accountRepoMock = new Mock<ICurrentAccountRepository>();
         _productRepoMock = new Mock<IProductRepository>();
+        _warehouseRepoMock = new Mock<IWarehouseRepository>();
         
         _handler = new CreatePurchaseCommandHandler(
             _purchaseRepoMock.Object, 
             _accountRepoMock.Object, 
             _productRepoMock.Object, 
-            Mapper);
+            _warehouseRepoMock.Object,
+            Mapper, 
+            _cacheServiceMock.Object);
     }
 
     [Fact]
@@ -37,6 +44,7 @@ public class CreatePurchaseCommandHandlerTests : TestBase
         var command = new CreatePurchaseCommand
         {
             CurrentAccountId = 1,
+            WarehouseId = 1,
             Items = new List<CreatePurchaseItemRequest>
             {
                 new() { ProductId = 1, Quantity = 5, UnitPrice = 20 }
@@ -44,10 +52,14 @@ public class CreatePurchaseCommandHandlerTests : TestBase
         };
 
         var account = new CurrentAccount { Id = command.CurrentAccountId, Type = CurrentAccountType.Supplier };
-        var product = new Product { Id = command.Items[0].ProductId, PurchasePrice = 20, VatRate = 18 };
+        var product = new Product { Id = command.Items[0].ProductId, StockQuantity = 10, PurchasePrice = 20, VatRate = 18 };
+        var warehouse = new Warehouse { Id = 1, IsActive = true, Name = "Main" };
 
         _accountRepoMock.Setup(r => r.GetByIdAsync(command.CurrentAccountId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(account);
+
+        _warehouseRepoMock.Setup(r => r.GetByIdAsync(command.WarehouseId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(warehouse);
 
         _productRepoMock.Setup(r => r.GetByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Product> { product });
@@ -140,6 +152,7 @@ public class CreatePurchaseCommandHandlerTests : TestBase
         var command = new CreatePurchaseCommand
         {
             CurrentAccountId = 1,
+            WarehouseId = 1,
             Items = new List<CreatePurchaseItemRequest>
             {
                 new() { ProductId = 1, Quantity = 1 }
@@ -148,9 +161,13 @@ public class CreatePurchaseCommandHandlerTests : TestBase
 
         var account = new CurrentAccount { Id = command.CurrentAccountId, Type = CurrentAccountType.Supplier };
         var product = new Product { Id = command.Items[0].ProductId };
+        var warehouse = new Warehouse { Id = 1, IsActive = true, Name = "Main" };
 
         _accountRepoMock.Setup(r => r.GetByIdAsync(command.CurrentAccountId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(account);
+            
+        _warehouseRepoMock.Setup(r => r.GetByIdAsync(command.WarehouseId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(warehouse);
 
         _productRepoMock.Setup(r => r.GetByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Product> { product });
@@ -166,6 +183,71 @@ public class CreatePurchaseCommandHandlerTests : TestBase
         result.StatusCode.Should().Be(409);
         result.Message.Should().Contain("zaman");
     }
-}
 
+    [Fact]
+    public async Task Handle_ShouldInvalidateDashboardCache_WhenPurchaseCreatedSuccessfully()
+    {
+        // Arrange
+        var command = new CreatePurchaseCommand
+        {
+            CurrentAccountId = 1,
+            WarehouseId = 1,
+            Items = new List<CreatePurchaseItemRequest>
+            {
+                new() { ProductId = 1, Quantity = 3, UnitPrice = 50 }
+            }
+        };
+
+        var account = new CurrentAccount { Id = command.CurrentAccountId, Type = CurrentAccountType.Supplier };
+        var product = new Product { Id = command.Items[0].ProductId, PurchasePrice = 50, VatRate = 18 };
+        var warehouse = new Warehouse { Id = 1, IsActive = true, Name = "Main" };
+
+        _accountRepoMock.Setup(r => r.GetByIdAsync(command.CurrentAccountId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(account);
+            
+        _warehouseRepoMock.Setup(r => r.GetByIdAsync(command.WarehouseId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(warehouse);
+
+        _productRepoMock.Setup(r => r.GetByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Product> { product });
+
+        _purchaseRepoMock.Setup(r => r.CreatePurchaseAsync(It.IsAny<Purchase>(), It.IsAny<List<PurchaseItem>>(), It.IsAny<CurrentAccount>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Purchase p, List<PurchaseItem> items, CurrentAccount a, CancellationToken ct) => p);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Success.Should().BeTrue();
+
+        // Dashboard cache MUST be invalidated after successful purchase
+        _cacheServiceMock.Verify(c => c.RemoveByPrefixAsync(
+            CacheKeys.DashboardPrefix,
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+    [Fact]
+    public async Task Handle_ShouldReturn404_WhenWarehouseNotFound()
+    {
+        var command = new CreatePurchaseCommand { CurrentAccountId = 1, WarehouseId = 99, Items = new List<CreatePurchaseItemRequest> { new() { ProductId = 1, Quantity = 1 } } };
+        var account = new CurrentAccount { Id = 1, Type = CurrentAccountType.Supplier };
+        _accountRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(account);
+        _warehouseRepoMock.Setup(x => x.GetByIdAsync(99, It.IsAny<CancellationToken>())).ReturnsAsync((Warehouse?)null);
+        var result = await _handler.Handle(command, CancellationToken.None);
+        Assert.False(result.Success);
+        Assert.Equal(404, result.StatusCode);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturn422_WhenWarehouseIsPassive()
+    {
+        var command = new CreatePurchaseCommand { CurrentAccountId = 1, WarehouseId = 2, Items = new List<CreatePurchaseItemRequest> { new() { ProductId = 1, Quantity = 1 } } };
+        var account = new CurrentAccount { Id = 1, Type = CurrentAccountType.Supplier };
+        var warehouse = new Warehouse { Id = 2, IsActive = false, Name = "Passive" };
+        _accountRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(account);
+        _warehouseRepoMock.Setup(x => x.GetByIdAsync(2, It.IsAny<CancellationToken>())).ReturnsAsync(warehouse);
+        var result = await _handler.Handle(command, CancellationToken.None);
+        Assert.False(result.Success);
+        Assert.Equal(422, result.StatusCode);
+    }
+}
 

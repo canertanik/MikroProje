@@ -1,4 +1,5 @@
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Interfaces;
@@ -7,10 +8,12 @@ namespace MikroProje.Application.Features.StockTransfers.Commands.CompleteStockT
 
 public class CompleteStockTransferCommandHandler : IRequestHandler<CompleteStockTransferCommand, Result<bool>>
 {
+    private readonly ICacheService _cacheService;
     private readonly IStockTransferRepository _repository;
 
-    public CompleteStockTransferCommandHandler(IStockTransferRepository repository)
+    public CompleteStockTransferCommandHandler(IStockTransferRepository repository, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _repository = repository;
     }
 

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Features.Payments.Commands.UpdatePayment;
 using MikroProje.Application.Interfaces;
 using MikroProje.Domain.Entities;
@@ -9,13 +10,15 @@ namespace MikroProje.Tests.Handlers.Payments;
 
 public class UpdatePaymentCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<IPaymentRepository> _paymentRepositoryMock;
     private readonly UpdatePaymentCommandHandler _handler;
 
     public UpdatePaymentCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _paymentRepositoryMock = new Mock<IPaymentRepository>();
-        _handler = new UpdatePaymentCommandHandler(_paymentRepositoryMock.Object, Mapper);
+        _handler = new UpdatePaymentCommandHandler(_paymentRepositoryMock.Object, Mapper, _cacheServiceMock.Object);
     }
 
     [Fact]

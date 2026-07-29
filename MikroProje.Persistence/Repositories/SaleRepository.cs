@@ -116,6 +116,7 @@ public class SaleRepository : ISaleRepository
                 // 2b. StockMovement INSERT (StockOut)
                 var movement = new StockMovement
                 {
+                    WarehouseId = sale.WarehouseId, // FIX: assign WarehouseId
                     ProductId = product.Id,
                     MovementType = StockMovementType.StockOut,
                     SourceType = StockMovementSourceType.Sale,

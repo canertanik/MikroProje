@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Features.Sales.Commands.UpdateSale;
 using MikroProje.Application.Interfaces;
@@ -10,13 +11,15 @@ namespace MikroProje.Tests.Handlers.Sales;
 
 public class UpdateSaleCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<ISaleRepository> _saleRepositoryMock;
     private readonly UpdateSaleCommandHandler _handler;
 
     public UpdateSaleCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _saleRepositoryMock = new Mock<ISaleRepository>();
-        _handler = new UpdateSaleCommandHandler(_saleRepositoryMock.Object, Mapper);
+        _handler = new UpdateSaleCommandHandler(_saleRepositoryMock.Object, Mapper, _cacheServiceMock.Object);
     }
 
     [Fact]

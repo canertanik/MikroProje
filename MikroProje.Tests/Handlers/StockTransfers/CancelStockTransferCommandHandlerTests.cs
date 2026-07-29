@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Features.StockTransfers.Commands.CancelStockTransfer;
 using MikroProje.Application.Interfaces;
@@ -9,13 +10,15 @@ namespace MikroProje.Tests.Handlers.StockTransfers;
 
 public class CancelStockTransferCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<IStockTransferRepository> _stockTransferRepositoryMock;
     private readonly CancelStockTransferCommandHandler _handler;
 
     public CancelStockTransferCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _stockTransferRepositoryMock = new Mock<IStockTransferRepository>();
-        _handler = new CancelStockTransferCommandHandler(_stockTransferRepositoryMock.Object);
+        _handler = new CancelStockTransferCommandHandler(_stockTransferRepositoryMock.Object, _cacheServiceMock.Object);
     }
 
     [Fact]

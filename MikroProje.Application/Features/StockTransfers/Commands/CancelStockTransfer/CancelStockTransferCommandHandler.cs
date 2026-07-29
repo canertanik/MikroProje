@@ -1,4 +1,5 @@
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Interfaces;
@@ -7,10 +8,12 @@ namespace MikroProje.Application.Features.StockTransfers.Commands.CancelStockTra
 
 public class CancelStockTransferCommandHandler : IRequestHandler<CancelStockTransferCommand, Result<bool>>
 {
+    private readonly ICacheService _cacheService;
     private readonly IStockTransferRepository _repository;
 
-    public CancelStockTransferCommandHandler(IStockTransferRepository repository)
+    public CancelStockTransferCommandHandler(IStockTransferRepository repository, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _repository = repository;
     }
 
@@ -19,7 +22,7 @@ public class CancelStockTransferCommandHandler : IRequestHandler<CancelStockTran
         try
         {
             await _repository.CancelTransferAsync(request.Id, request.RowVersion, cancellationToken);
-            return Result<bool>.Ok(true, "Transfer baþarýyla iptal edildi.");
+            return Result<bool>.Ok(true, "Transfer baï¿½arï¿½yla iptal edildi.");
         }
         catch (ConcurrencyConflictException ex)
         {

@@ -8,6 +8,8 @@ public class CreateSaleCommand : IRequest<Result<SaleDto>>
 {
     public int CurrentAccountId { get; set; }
 
+    public int WarehouseId { get; set; }
+
     public List<SaleItemDto> Items { get; set; } = new();
 
     public string? Description { get; set; }

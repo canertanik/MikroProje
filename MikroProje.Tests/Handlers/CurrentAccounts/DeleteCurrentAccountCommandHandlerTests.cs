@@ -1,5 +1,6 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Features.CurrentAccounts.Commands.DeleteCurrentAccount;
 using MikroProje.Application.Interfaces;
 using MikroProje.Domain.Entities;
@@ -9,13 +10,15 @@ namespace MikroProje.Tests.Handlers.CurrentAccounts;
 
 public class DeleteCurrentAccountCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<ICurrentAccountRepository> _repositoryMock;
     private readonly DeleteCurrentAccountCommandHandler _handler;
 
     public DeleteCurrentAccountCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _repositoryMock = new Mock<ICurrentAccountRepository>();
-        _handler = new DeleteCurrentAccountCommandHandler(_repositoryMock.Object);
+        _handler = new DeleteCurrentAccountCommandHandler(_repositoryMock.Object, _cacheServiceMock.Object);
     }
 
     [Fact]

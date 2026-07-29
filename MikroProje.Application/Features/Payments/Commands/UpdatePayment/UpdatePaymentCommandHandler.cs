@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Features.Payments.DTOs;
 using MikroProje.Application.Interfaces;
@@ -8,11 +9,13 @@ namespace MikroProje.Application.Features.Payments.Commands.UpdatePayment;
 
 public class UpdatePaymentCommandHandler : IRequestHandler<UpdatePaymentCommand, Result<PaymentDto>>
 {
+    private readonly ICacheService _cacheService;
     private readonly IPaymentRepository _paymentRepository;
     private readonly IMapper _mapper;
 
-    public UpdatePaymentCommandHandler(IPaymentRepository paymentRepository, IMapper mapper)
+    public UpdatePaymentCommandHandler(IPaymentRepository paymentRepository, IMapper mapper, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _paymentRepository = paymentRepository;
         _mapper = mapper;
     }

@@ -1,4 +1,5 @@
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Interfaces;
 
@@ -6,10 +7,12 @@ namespace MikroProje.Application.Features.CurrentAccounts.Commands.DeleteCurrent
 
 public class DeleteCurrentAccountCommandHandler : IRequestHandler<DeleteCurrentAccountCommand, Result<bool>>
 {
+    private readonly ICacheService _cacheService;
     private readonly ICurrentAccountRepository _repository;
 
-    public DeleteCurrentAccountCommandHandler(ICurrentAccountRepository repository)
+    public DeleteCurrentAccountCommandHandler(ICurrentAccountRepository repository, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _repository = repository;
     }
 

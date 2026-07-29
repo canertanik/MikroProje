@@ -8,8 +8,10 @@ public class CreateSaleCommandValidator : AbstractValidator<CreateSaleCommand>
     public CreateSaleCommandValidator()
     {
         RuleFor(x => x.CurrentAccountId)
-            .GreaterThan(0)
-            .WithMessage("CurrentAccountId sıfırdan büyük olmalıdır.");
+            .GreaterThan(0).WithMessage("Cari hesap ID'si 0'dan büyük olmalıdır.");
+
+        RuleFor(x => x.WarehouseId)
+            .GreaterThan(0).WithMessage("Depo ID'si 0'dan büyük olmalıdır.");
 
         RuleFor(x => x.Items)
             .NotEmpty()

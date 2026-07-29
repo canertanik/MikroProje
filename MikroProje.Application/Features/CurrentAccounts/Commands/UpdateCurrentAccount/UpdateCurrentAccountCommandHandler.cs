@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Features.CurrentAccounts.DTOs;
 using MikroProje.Application.Interfaces;
@@ -8,11 +9,13 @@ namespace MikroProje.Application.Features.CurrentAccounts.Commands.UpdateCurrent
 
 public class UpdateCurrentAccountCommandHandler : IRequestHandler<UpdateCurrentAccountCommand, Result<CurrentAccountDto>>
 {
+    private readonly ICacheService _cacheService;
     private readonly ICurrentAccountRepository _repository;
     private readonly IMapper _mapper;
 
-    public UpdateCurrentAccountCommandHandler(ICurrentAccountRepository repository, IMapper mapper)
+    public UpdateCurrentAccountCommandHandler(ICurrentAccountRepository repository, IMapper mapper, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _repository = repository;
         _mapper = mapper;
     }

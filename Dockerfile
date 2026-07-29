@@ -8,6 +8,7 @@ COPY MikroProje.Application/MikroProje.Application.csproj MikroProje.Application
 COPY MikroProje.Infrastructure/MikroProje.Infrastructure.csproj MikroProje.Infrastructure/
 COPY MikroProje.Persistence/MikroProje.Persistence.csproj MikroProje.Persistence/
 COPY MikroProje.API/MikroProje.API.csproj MikroProje.API/
+COPY MikroProje.Tests/MikroProje.Tests.csproj MikroProje.Tests/
 
 RUN dotnet restore
 

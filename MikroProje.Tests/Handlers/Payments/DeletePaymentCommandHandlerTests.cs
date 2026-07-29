@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Features.Payments.Commands.DeletePayment;
 using MikroProje.Application.Interfaces;
 using MikroProje.Domain.Entities;
@@ -9,13 +10,15 @@ namespace MikroProje.Tests.Handlers.Payments;
 
 public class DeletePaymentCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<IPaymentRepository> _paymentRepositoryMock;
     private readonly DeletePaymentCommandHandler _handler;
 
     public DeletePaymentCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _paymentRepositoryMock = new Mock<IPaymentRepository>();
-        _handler = new DeletePaymentCommandHandler(_paymentRepositoryMock.Object);
+        _handler = new DeletePaymentCommandHandler(_paymentRepositoryMock.Object, _cacheServiceMock.Object);
     }
 
     [Fact]

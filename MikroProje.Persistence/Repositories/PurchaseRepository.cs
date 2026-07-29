@@ -77,6 +77,7 @@ public class PurchaseRepository : IPurchaseRepository
                 // 2b. StockMovement INSERT (StockIn)
                 var movement = new StockMovement
                 {
+                    WarehouseId = purchase.WarehouseId, // FIX: assign WarehouseId
                     ProductId = product.Id,
                     MovementType = StockMovementType.StockIn,
                     SourceType = StockMovementSourceType.Purchase,

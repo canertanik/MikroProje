@@ -1,5 +1,6 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Features.StockTransfers.Commands.CreateStockTransfer;
 using MikroProje.Application.Interfaces;
 using MikroProje.Domain.Entities;
@@ -10,6 +11,7 @@ namespace MikroProje.Tests.Handlers.StockTransfers;
 
 public class CreateStockTransferCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<IStockTransferRepository> _stockTransferRepositoryMock;
     private readonly Mock<IWarehouseRepository> _warehouseRepositoryMock;
     private readonly Mock<IProductRepository> _productRepositoryMock;
@@ -17,6 +19,7 @@ public class CreateStockTransferCommandHandlerTests : TestBase
 
     public CreateStockTransferCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _stockTransferRepositoryMock = new Mock<IStockTransferRepository>();
         _warehouseRepositoryMock = new Mock<IWarehouseRepository>();
         _productRepositoryMock = new Mock<IProductRepository>();
@@ -25,7 +28,7 @@ public class CreateStockTransferCommandHandlerTests : TestBase
             _stockTransferRepositoryMock.Object, 
             _warehouseRepositoryMock.Object, 
             _productRepositoryMock.Object, 
-            Mapper);
+            Mapper, _cacheServiceMock.Object);
     }
 
     [Fact]

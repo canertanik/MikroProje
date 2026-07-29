@@ -1,4 +1,5 @@
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Interfaces;
@@ -7,10 +8,12 @@ namespace MikroProje.Application.Features.Sales.Commands.CancelSale;
 
 public class CancelSaleCommandHandler : IRequestHandler<CancelSaleCommand, Result<bool>>
 {
+    private readonly ICacheService _cacheService;
     private readonly ISaleRepository _saleRepository;
 
-    public CancelSaleCommandHandler(ISaleRepository saleRepository)
+    public CancelSaleCommandHandler(ISaleRepository saleRepository, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _saleRepository = saleRepository;
     }
 

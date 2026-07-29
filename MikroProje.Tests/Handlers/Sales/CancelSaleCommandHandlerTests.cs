@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Features.Sales.Commands.CancelSale;
 using MikroProje.Application.Interfaces;
@@ -10,13 +11,15 @@ namespace MikroProje.Tests.Handlers.Sales;
 
 public class CancelSaleCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<ISaleRepository> _repositoryMock;
     private readonly CancelSaleCommandHandler _handler;
 
     public CancelSaleCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _repositoryMock = new Mock<ISaleRepository>();
-        _handler = new CancelSaleCommandHandler(_repositoryMock.Object);
+        _handler = new CancelSaleCommandHandler(_repositoryMock.Object, _cacheServiceMock.Object);
     }
 
     [Fact]

@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Features.StockMovements.DTOs;
@@ -9,12 +10,14 @@ namespace MikroProje.Application.Features.StockMovements.Commands.CreateStockMov
 
 public class CreateStockMovementCommandHandler : IRequestHandler<CreateStockMovementCommand, Result<StockMovementDto>>
 {
+    private readonly ICacheService _cacheService;
     private readonly IStockMovementRepository _stockMovementRepository;
     private readonly IProductRepository _productRepository;
     private readonly IMapper _mapper;
 
-    public CreateStockMovementCommandHandler(IStockMovementRepository stockMovementRepository, IProductRepository productRepository, IMapper mapper)
+    public CreateStockMovementCommandHandler(IStockMovementRepository stockMovementRepository, IProductRepository productRepository, IMapper mapper, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _stockMovementRepository = stockMovementRepository;
         _productRepository = productRepository;
         _mapper = mapper;

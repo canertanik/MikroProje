@@ -1,5 +1,6 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Features.Products.Commands.CreateProduct;
 using MikroProje.Application.Interfaces;
@@ -10,13 +11,15 @@ namespace MikroProje.Tests.Handlers.Products;
 
 public class CreateProductCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<IProductRepository> _repositoryMock;
     private readonly CreateProductCommandHandler _handler;
 
     public CreateProductCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _repositoryMock = new Mock<IProductRepository>();
-        _handler = new CreateProductCommandHandler(_repositoryMock.Object, Mapper);
+        _handler = new CreateProductCommandHandler(_repositoryMock.Object, Mapper, _cacheServiceMock.Object);
     }
 
     [Fact]

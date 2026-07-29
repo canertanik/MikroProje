@@ -1,5 +1,6 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Features.StockMovements.Commands.CreateStockMovement;
 using MikroProje.Application.Interfaces;
@@ -11,15 +12,17 @@ namespace MikroProje.Tests.Handlers.StockMovements;
 
 public class CreateStockMovementCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<IStockMovementRepository> _stockMovementRepositoryMock;
     private readonly Mock<IProductRepository> _productRepositoryMock;
     private readonly CreateStockMovementCommandHandler _handler;
 
     public CreateStockMovementCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _stockMovementRepositoryMock = new Mock<IStockMovementRepository>();
         _productRepositoryMock = new Mock<IProductRepository>();
-        _handler = new CreateStockMovementCommandHandler(_stockMovementRepositoryMock.Object, _productRepositoryMock.Object, Mapper);
+        _handler = new CreateStockMovementCommandHandler(_stockMovementRepositoryMock.Object, _productRepositoryMock.Object, Mapper, _cacheServiceMock.Object);
     }
 
     [Fact]

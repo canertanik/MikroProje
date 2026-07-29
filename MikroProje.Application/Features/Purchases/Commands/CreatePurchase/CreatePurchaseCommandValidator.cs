@@ -9,6 +9,9 @@ public class CreatePurchaseCommandValidator : AbstractValidator<CreatePurchaseCo
         RuleFor(x => x.CurrentAccountId)
             .GreaterThan(0).WithMessage("Geçerli bir cari hesap seçilmelidir.");
 
+        RuleFor(x => x.WarehouseId)
+            .GreaterThan(0).WithMessage("Geçerli bir depo seçilmelidir.");
+
         RuleFor(x => x.Items)
             .NotEmpty().WithMessage("Satın alma işleminde en az bir kalem bulunmalıdır.");
 

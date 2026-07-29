@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Features.Products.Commands.DeleteProduct;
 using MikroProje.Application.Interfaces;
@@ -10,13 +11,15 @@ namespace MikroProje.Tests.Handlers.Products;
 
 public class DeleteProductCommandHandlerTests : TestBase
 {
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<IProductRepository> _repositoryMock;
     private readonly DeleteProductCommandHandler _handler;
 
     public DeleteProductCommandHandlerTests()
     {
+        _cacheServiceMock = new Mock<ICacheService>();
         _repositoryMock = new Mock<IProductRepository>();
-        _handler = new DeleteProductCommandHandler(_repositoryMock.Object);
+        _handler = new DeleteProductCommandHandler(_repositoryMock.Object, _cacheServiceMock.Object);
     }
 
     [Fact]

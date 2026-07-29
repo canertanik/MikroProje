@@ -1,4 +1,5 @@
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Interfaces;
 
@@ -6,10 +7,12 @@ namespace MikroProje.Application.Features.Payments.Commands.DeletePayment;
 
 public class DeletePaymentCommandHandler : IRequestHandler<DeletePaymentCommand, Result<int>>
 {
+    private readonly ICacheService _cacheService;
     private readonly IPaymentRepository _paymentRepository;
 
-    public DeletePaymentCommandHandler(IPaymentRepository paymentRepository)
+    public DeletePaymentCommandHandler(IPaymentRepository paymentRepository, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _paymentRepository = paymentRepository;
     }
 

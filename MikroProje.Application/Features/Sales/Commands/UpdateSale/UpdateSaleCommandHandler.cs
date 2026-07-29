@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Features.Sales.DTOs;
@@ -9,11 +10,13 @@ namespace MikroProje.Application.Features.Sales.Commands.UpdateSale;
 
 public class UpdateSaleCommandHandler : IRequestHandler<UpdateSaleCommand, Result<SaleDto>>
 {
+    private readonly ICacheService _cacheService;
     private readonly ISaleRepository _saleRepository;
     private readonly IMapper _mapper;
 
-    public UpdateSaleCommandHandler(ISaleRepository saleRepository, IMapper mapper)
+    public UpdateSaleCommandHandler(ISaleRepository saleRepository, IMapper mapper, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _saleRepository = saleRepository;
         _mapper = mapper;
     }

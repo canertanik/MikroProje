@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Features.Products.DTOs;
@@ -10,11 +11,13 @@ namespace MikroProje.Application.Features.Products.Commands.CreateProduct;
 
 public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, Result<ProductDto>>
 {
+    private readonly ICacheService _cacheService;
     private readonly IProductRepository _productRepository;
     private readonly IMapper _mapper;
 
-    public CreateProductCommandHandler(IProductRepository productRepository, IMapper mapper)
+    public CreateProductCommandHandler(IProductRepository productRepository, IMapper mapper, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _productRepository = productRepository;
         _mapper = mapper;
     }

@@ -8,6 +8,8 @@ public class CreatePurchaseCommand : IRequest<Result<PurchaseDto>>
 {
     public int CurrentAccountId { get; set; }
 
+    public int WarehouseId { get; set; }
+
     public DateTime? PurchaseDate { get; set; }
 
     public string? Description { get; set; }

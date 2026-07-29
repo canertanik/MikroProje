@@ -1,4 +1,5 @@
 using MediatR;
+using MikroProje.Application.Common.Caching;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Common.Results;
 using MikroProje.Application.Interfaces;
@@ -7,10 +8,12 @@ namespace MikroProje.Application.Features.Products.Commands.DeleteProduct;
 
 public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand, Result<bool>>
 {
+    private readonly ICacheService _cacheService;
     private readonly IProductRepository _productRepository;
 
-    public DeleteProductCommandHandler(IProductRepository productRepository)
+    public DeleteProductCommandHandler(IProductRepository productRepository, ICacheService cacheService)
     {
+        _cacheService = cacheService;
         _productRepository = productRepository;
     }
 
