@@ -203,3 +203,39 @@ Ayarları değiştirmek için `appsettings.json` içerisindeki `RateLimiting` b�
 1. Uygulamayı ayağa kaldırın ve Swagger arayüzüne (veya Postman'e) gidin.
 2. Herhangi bir GET veya POST isteğini üst üste (çok hızlı) gönderin.
 3. PermitLimit (örn: 100) aşıldığında bir sonraki isteğin 200 OK yerine 429 döndüğünü göreceksiniz. Response headers sekmesinden `Retry-After` değerini kontrol edebilirsiniz.
+
+## 🩺 Health Checks (Sağlık Kontrolleri)
+
+Uygulamanın ve bağlı olduğu dış sistemlerin durumunu izlemek için dahili Health Check endpointleri bulunmaktadır.
+Bu endpointler kimlik doğrulama gerektirmez ve rate limiting kısıtlamalarına tabi değildir.
+
+### Endpointler
+
+- **`/health/live`**: Sadece uygulamanın API olarak ayakta olup olmadığını kontrol eder. Veritabanı veya Redis bağlantılarını beklemez (Kubernetes/Docker liveness probe için idealdir).
+- **`/health/ready`**: API'nin, SQL Server'ın ve Redis'in tümünün kullanıma hazır olup olmadığını kontrol eder.
+- **`/health`**: Tüm kontrollerin detaylı genel özetini döner.
+
+### Örnek Response (JSON)
+```json
+{
+  "status": "Healthy",
+  "totalDuration": "00:00:00.0123456",
+  "checks": [
+    {
+      "name": "sqlserver",
+      "status": "Healthy",
+      "duration": "00:00:00.0051234",
+      "description": null
+    },
+    {
+      "name": "redis",
+      "status": "Healthy",
+      "duration": "00:00:00.0034123",
+      "description": null
+    }
+  ]
+}
+```
+
+### Docker Kullanımı
+`docker-compose.yml` içinde API container'ının hazır olduğunu kontrol etmek için `curl -f http://localhost:8080/health/live` komutu kullanılmaktadır. Böylece SQL ve Redis'e olan bağımlılık `depends_on: condition: service_healthy` ile yönetilirken, uygulamanın kendisinin çöktüğü (veya HTTP trafiği almadığı) durumlarda Docker Health Check mekanizması API'yi yeniden başlatabilir.

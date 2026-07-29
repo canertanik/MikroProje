@@ -11,11 +11,21 @@ using MikroProje.Persistence;
 using MikroProje.API.Extensions;
 using Serilog;
 using Serilog.Events;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCustomObservability(builder);
 
-builder.Services.AddHealthChecks().AddDbContextCheck<MikroProje.Persistence.Contexts.MikroProjeDbContext>();
+builder.Services.AddHealthChecks()
+    .AddCheck("live", () => HealthCheckResult.Healthy("Application is live"), tags: new[] { "live" })
+    .AddDbContextCheck<MikroProje.Persistence.Contexts.MikroProjeDbContext>(
+        name: "sqlserver",
+        tags: new[] { "ready" })
+    .AddRedis(
+        builder.Configuration["Redis:ConnectionString"]!,
+        name: "redis",
+        tags: new[] { "ready" });
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<MikroProje.Application.Interfaces.ICurrentUserService, MikroProje.API.Services.CurrentUserService>();
@@ -133,7 +143,26 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHealthChecks("/health");
+var healthCheckOptions = new HealthCheckOptions
+{
+    ResponseWriter = MikroProje.API.Extensions.HealthCheckExtensions.WriteResponse
+};
+
+var liveCheckOptions = new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("live"),
+    ResponseWriter = MikroProje.API.Extensions.HealthCheckExtensions.WriteResponse
+};
+
+var readyCheckOptions = new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready"),
+    ResponseWriter = MikroProje.API.Extensions.HealthCheckExtensions.WriteResponse
+};
+
+app.MapHealthChecks("/health", healthCheckOptions).AllowAnonymous().DisableRateLimiting();
+app.MapHealthChecks("/health/live", liveCheckOptions).AllowAnonymous().DisableRateLimiting();
+app.MapHealthChecks("/health/ready", readyCheckOptions).AllowAnonymous().DisableRateLimiting();
 
 if (builder.Configuration["Database:ApplyMigrations"] == "true")
 {

@@ -24,3 +24,6 @@ Thumbs.db
 .DS_Store
 # Docker env
 .env
+logs/
+api_out.txt
+api_err.txt

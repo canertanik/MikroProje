@@ -39,8 +39,8 @@ public class RateLimitingTests : IClassFixture<WebApplicationFactory<Program>>
         var client = _factory.CreateClient();
         client.DefaultRequestHeaders.Add("X-Forwarded-For", "192.168.1.100");
 
-        var response1 = await client.GetAsync("/health");
-        var response2 = await client.GetAsync("/health");
+        var response1 = await client.GetAsync("/api/products");
+        var response2 = await client.GetAsync("/api/products");
 
         response1.StatusCode.Should().NotBe(HttpStatusCode.TooManyRequests);
         response2.StatusCode.Should().NotBe(HttpStatusCode.TooManyRequests);
@@ -52,9 +52,9 @@ public class RateLimitingTests : IClassFixture<WebApplicationFactory<Program>>
         var client = _factory.CreateClient();
         client.DefaultRequestHeaders.Add("X-Forwarded-For", "192.168.1.101");
 
-        await client.GetAsync("/health");
-        await client.GetAsync("/health");
-        var response3 = await client.GetAsync("/health");
+        await client.GetAsync("/api/products");
+        await client.GetAsync("/api/products");
+        var response3 = await client.GetAsync("/api/products");
 
         response3.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
         response3.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
@@ -92,13 +92,13 @@ public class RateLimitingTests : IClassFixture<WebApplicationFactory<Program>>
         client2.DefaultRequestHeaders.Add("X-Forwarded-For", "192.168.1.104");
 
         // client1 uses all its limit
-        await client1.GetAsync("/health");
-        await client1.GetAsync("/health");
-        var response1 = await client1.GetAsync("/health");
+        await client1.GetAsync("/api/products");
+        await client1.GetAsync("/api/products");
+        var response1 = await client1.GetAsync("/api/products");
         response1.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
 
         // client2 should still be able to make requests (limit is 2)
-        var response2 = await client2.GetAsync("/health");
+        var response2 = await client2.GetAsync("/api/products");
         response2.StatusCode.Should().NotBe(HttpStatusCode.TooManyRequests);
     }
 
@@ -109,16 +109,16 @@ public class RateLimitingTests : IClassFixture<WebApplicationFactory<Program>>
         client.DefaultRequestHeaders.Add("X-Forwarded-For", "192.168.1.105");
 
         // Use up the limit (2)
-        await client.GetAsync("/health");
-        await client.GetAsync("/health");
-        var response1 = await client.GetAsync("/health");
+        await client.GetAsync("/api/products");
+        await client.GetAsync("/api/products");
+        var response1 = await client.GetAsync("/api/products");
         response1.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
 
         // Wait for the window to expire (2 seconds + a small buffer)
         await Task.Delay(TimeSpan.FromSeconds(2.5));
 
         // Should be accepted again
-        var response2 = await client.GetAsync("/health");
+        var response2 = await client.GetAsync("/api/products");
         response2.StatusCode.Should().NotBe(HttpStatusCode.TooManyRequests);
     }
 }
