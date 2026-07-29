@@ -166,6 +166,40 @@ dotnet test --collect:"XPlat Code Coverage"
 Bu komut, TestResults klasörü altında coverage.cobertura.xml dosyası oluşturur.
 
 **Güncel Test Metrikleri:**
-- Toplam Test Sayısı: 147
+- Toplam Test Sayısı: 166
 - Application Line Coverage: %76.66
 - Application Branch Coverage: %69.42
+
+## 🛡️ Rate Limiting (İstek Sınırlandırma)
+
+Projede ASP.NET Core **built-in Rate Limiting** özelliği bulunmaktadır. Kötü niyetli kullanımı engellemek amacıyla IP bazlı sınırlandırmalar mevcuttur.
+
+Mevcut Politikalar:
+- **Global**: Dakikada 100 istek (Varsayılan tüm endpoint'ler).
+- **Login**: Dakikada 10 istek (Brute-force koruması).
+
+Sınır aşıldığında API **429 Too Many Requests** yanıtı (ProblemDetails formatında) ve `Retry-After` header'ı döner.
+Ayarları değiştirmek için `appsettings.json` içerisindeki `RateLimiting` bölümünü veya Docker üzerinden ortam değişkenlerini kullanabilirsiniz:
+
+```json
+"RateLimiting": {
+  "Global": { "PermitLimit": 100, "WindowSeconds": 60, "QueueLimit": 0 },
+  "Login": { "PermitLimit": 10, "WindowSeconds": 60, "QueueLimit": 0 }
+}
+```
+
+**Örnek 429 Yanıtı (ProblemDetails formatında):**
+```json
+{
+  "title": "Çok Fazla İstek",
+  "status": 429,
+  "detail": "Sistem limitlerini aştınız. Lütfen daha sonra tekrar deneyiniz.",
+  "instance": "/api/products"
+}
+```
+*(Ayrıca HTTP yanıtında `Retry-After: 60` header'ı bulunur)*
+
+**Swagger Üzerinden Test Adımları:**
+1. Uygulamayı ayağa kaldırın ve Swagger arayüzüne (veya Postman'e) gidin.
+2. Herhangi bir GET veya POST isteğini üst üste (çok hızlı) gönderin.
+3. PermitLimit (örn: 100) aşıldığında bir sonraki isteğin 200 OK yerine 429 döndüğünü göreceksiniz. Response headers sekmesinden `Retry-After` değerini kontrol edebilirsiniz.

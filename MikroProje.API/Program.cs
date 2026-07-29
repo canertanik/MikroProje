@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using MikroProje.Application;
 using MikroProje.Infrastructure;
 using MikroProje.Persistence;
+using MikroProje.API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +53,7 @@ builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddScoped<MikroProje.Application.Interfaces.IApplicationDbContext>(provider => provider.GetRequiredService<MikroProje.Persistence.Contexts.MikroProjeDbContext>());
 builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddCustomRateLimiting(builder.Configuration);
 
 // JWT Authentication Configuration
 builder.Services.AddAuthentication(options =>
@@ -87,6 +89,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseMiddleware<MikroProje.API.Middlewares.GlobalExceptionMiddleware>();
+
+app.UseRouting();
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -131,5 +136,4 @@ if (builder.Configuration["Database:ApplyMigrations"] == "true")
 
 app.Run();
 
-
-
+public partial class Program { }

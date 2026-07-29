@@ -8,6 +8,8 @@ using MikroProje.Application.Features.Auth.Commands.RevokeToken;
 using MikroProje.Application.Features.Auth.DTOs;
 using MikroProje.Application.Features.Auth.Queries.GetCurrentUser;
 using System.Security.Claims;
+using Microsoft.AspNetCore.RateLimiting;
+using MikroProje.API.Extensions;
 
 namespace MikroProje.API.Controllers;
 
@@ -33,6 +35,7 @@ public class AuthController : ControllerBase
     }
 
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Login)]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto request, CancellationToken cancellationToken)
     {

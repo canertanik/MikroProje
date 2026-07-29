@@ -1,0 +1,10 @@
+warning: in the working copy of 'MikroProje.API/Controllers/AuthController.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MikroProje.API/Program.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+ MikroProje.API/Controllers/AuthController.cs |  3 [32m+++[m
+ MikroProje.API/Program.cs                    |  8 [32m+++++[m[31m--[m
+ MikroProje.API/appsettings.Development.json  | 12 [32m++++++++++[m
+ MikroProje.API/appsettings.json              | 12 [32m++++++++++[m
+ MikroProje.Tests/MikroProje.Tests.csproj     |  4 [32m+++[m[31m-[m
+ README.md                                    | 36 [32m+++++++++++++++++++++++++++[m[31m-[m
+ 6 files changed, 71 insertions(+), 4 deletions(-)
