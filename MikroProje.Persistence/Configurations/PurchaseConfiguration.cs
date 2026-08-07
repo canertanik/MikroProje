@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MikroProje.Domain.Entities;
+using MikroProje.Domain.Enums;
 
 namespace MikroProje.Persistence.Configurations;
 
@@ -30,8 +31,12 @@ public class PurchaseConfiguration : IEntityTypeConfiguration<Purchase>
         builder.Property(x => x.PurchaseDate)
             .IsRequired();
 
-        // Soft Delete and RowVersion are assumed to be handled in the BaseEntity configuration or globally if needed, 
-        // but here we define RowVersion explicitly just in case:
+        builder.Property(x => x.Status)
+            .IsRequired()
+            .HasDefaultValue(PurchaseStatus.Pending);
+
+        builder.Property(x => x.ReceivedDate);
+
         builder.HasOne(x => x.CurrentAccount)
             .WithMany()
             .HasForeignKey(x => x.CurrentAccountId)

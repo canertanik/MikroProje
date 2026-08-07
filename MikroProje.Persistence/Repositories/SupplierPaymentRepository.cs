@@ -39,15 +39,46 @@ public class SupplierPaymentRepository : ISupplierPaymentRepository
     }
 
     public async Task<(IReadOnlyCollection<SupplierPayment> Items, int TotalCount)> GetAllAsync(
-        int? currentAccountId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+        int? currentAccountId, string? searchTerm, DateTime? startDate, DateTime? endDate, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
         var query = _dbContext.SupplierPayments
             .AsNoTracking()
+            .Include(sp => sp.CurrentAccount)
             .Where(sp => !sp.IsDeleted);
 
         if (currentAccountId.HasValue)
         {
             query = query.Where(sp => sp.CurrentAccountId == currentAccountId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.ToLower().Trim();
+            
+            var termForId = term.Replace("#", "").Trim();
+            if (termForId.StartsWith("0"))
+                termForId = termForId.TrimStart('0');
+            
+            if (string.IsNullOrEmpty(termForId))
+                termForId = term;
+
+            bool isNumericId = int.TryParse(termForId, out int searchId);
+
+            query = query.Where(sp => (isNumericId && sp.Id == searchId) || 
+                                      sp.CurrentAccount.Name.ToLower().Contains(term) ||
+                                      (sp.Description != null && sp.Description.ToLower().Contains(term)) ||
+                                      (sp.ReferenceNumber != null && sp.ReferenceNumber.ToLower().Contains(term)));
+        }
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(sp => sp.PaymentDate >= startDate.Value.Date);
+        }
+
+        if (endDate.HasValue)
+        {
+            var end = endDate.Value.Date.AddDays(1).AddTicks(-1);
+            query = query.Where(sp => sp.PaymentDate <= end);
         }
 
         var totalCount = await query.CountAsync(cancellationToken);

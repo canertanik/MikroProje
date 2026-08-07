@@ -11,4 +11,5 @@ public class StockTransferListDto
     public DateTime TransferDate { get; set; }
     public StockTransferStatus Status { get; set; }
     public DateTime CreatedDate { get; set; }
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }

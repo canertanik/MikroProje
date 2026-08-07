@@ -31,33 +31,11 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: mikroproje-api
-    depends_on:
-      sqlserver:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
-      - Database__ApplyMigrations=true
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MikroProjeDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;Encrypt=False;
-      - Redis__ConnectionString=redis:6379
-    ports:
-      - "8080:8080"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    restart: unless-stopped
-
   redis:
     image: redis:7.4-alpine
     container_name: mikroproje-redis
+    ports:
+      - "6379:6379"
     volumes:
       - redis-data:/data
     healthcheck:

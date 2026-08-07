@@ -20,7 +20,8 @@ public class GetAllSalesQueryHandler : IRequestHandler<GetAllSalesQuery, Result<
 
     public async Task<Result<PagedResult<SaleDto>>> Handle(GetAllSalesQuery request, CancellationToken cancellationToken)
     {
-        var (items, totalCount) = await _saleRepository.GetAllAsync(request.PageNumber, request.PageSize, cancellationToken);
+        var (items, totalCount) = await _saleRepository.GetAllAsync(
+            request.Search, request.PageNumber, request.PageSize, cancellationToken);
         var dtos = _mapper.Map<IReadOnlyCollection<SaleDto>>(items);
         var pagedResult = PagedResult<SaleDto>.Create(dtos, request.PageNumber, request.PageSize, totalCount);
         return Result<PagedResult<SaleDto>>.Ok(pagedResult);

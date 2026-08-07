@@ -29,12 +29,12 @@ public class GetDashboardSummaryQueryHandlerTests : TestBase
     [Fact]
     public async Task Handle_ShouldReturnFromCache_WhenCacheHit()
     {
-        var summary = new DashboardSummaryDto { TotalProductCount = 500 };
+        var summary = new DashboardSummaryDto { ActiveProductCount = 500 };
         var cachedResult = Result<DashboardSummaryDto>.Ok(summary);
 
         // Mock GetOrCreateAsync to simulate cache HIT (factory is NOT called)
         _cacheServiceMock.Setup(c => c.GetOrCreateAsync(
-            CacheKeys.DashboardSummary(),
+            CacheKeys.DashboardSummary(null, null),
             It.IsAny<Func<CancellationToken, Task<Result<DashboardSummaryDto>>>>(),
             It.IsAny<TimeSpan>(),
             It.IsAny<CancellationToken>()))
@@ -44,23 +44,23 @@ public class GetDashboardSummaryQueryHandlerTests : TestBase
         var result = await _handler.Handle(query, CancellationToken.None);
 
         result.Success.Should().BeTrue();
-        result.Data!.TotalProductCount.Should().Be(500);
+        result.Data!.ActiveProductCount.Should().Be(500);
 
         // Verify repository was NOT called
-        _repositoryMock.Verify(r => r.GetSummaryAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Never);
+        _repositoryMock.Verify(r => r.GetSummaryAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task Handle_ShouldCallRepository_WhenCacheMiss()
     {
-        var dbSummary = new DashboardSummaryDto { TotalProductCount = 300 };
+        var dbSummary = new DashboardSummaryDto { ActiveProductCount = 300 };
 
-        _repositoryMock.Setup(r => r.GetSummaryAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+        _repositoryMock.Setup(r => r.GetSummaryAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(dbSummary);
 
         // Mock GetOrCreateAsync to invoke the factory
         _cacheServiceMock.Setup(c => c.GetOrCreateAsync(
-            CacheKeys.DashboardSummary(),
+            CacheKeys.DashboardSummary(null, null),
             It.IsAny<Func<CancellationToken, Task<Result<DashboardSummaryDto>>>>(),
             It.IsAny<TimeSpan>(),
             It.IsAny<CancellationToken>()))
@@ -70,23 +70,23 @@ public class GetDashboardSummaryQueryHandlerTests : TestBase
         var result = await _handler.Handle(query, CancellationToken.None);
 
         result.Success.Should().BeTrue();
-        result.Data!.TotalProductCount.Should().Be(300);
+        result.Data!.ActiveProductCount.Should().Be(300);
 
         // Verify repository WAS called
-        _repositoryMock.Verify(r => r.GetSummaryAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(r => r.GetSummaryAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task Handle_ShouldFallbackToRepository_WhenRedisThrowsException()
     {
-        var dbSummary = new DashboardSummaryDto { TotalProductCount = 200 };
+        var dbSummary = new DashboardSummaryDto { ActiveProductCount = 200 };
 
-        _repositoryMock.Setup(r => r.GetSummaryAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+        _repositoryMock.Setup(r => r.GetSummaryAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(dbSummary);
 
         // Redis exception — GetOrCreateAsync should invoke the factory as fallback
         _cacheServiceMock.Setup(c => c.GetOrCreateAsync(
-            CacheKeys.DashboardSummary(),
+            CacheKeys.DashboardSummary(null, null),
             It.IsAny<Func<CancellationToken, Task<Result<DashboardSummaryDto>>>>(),
             It.IsAny<TimeSpan>(),
             It.IsAny<CancellationToken>()))
@@ -96,9 +96,9 @@ public class GetDashboardSummaryQueryHandlerTests : TestBase
         var result = await _handler.Handle(query, CancellationToken.None);
 
         result.Success.Should().BeTrue();
-        result.Data!.TotalProductCount.Should().Be(200);
+        result.Data!.ActiveProductCount.Should().Be(200);
 
         // Repository MUST be called when Redis fails
-        _repositoryMock.Verify(r => r.GetSummaryAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(r => r.GetSummaryAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

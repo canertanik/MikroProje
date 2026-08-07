@@ -7,7 +7,7 @@ public interface IPaymentRepository
     Task<Payment?> GetByIdAsync(int id, CancellationToken cancellationToken);
 
     Task<(IReadOnlyCollection<Payment> Items, int TotalCount)> GetAllAsync(
-        int? currentAccountId, int pageNumber, int pageSize, CancellationToken cancellationToken);
+        int? currentAccountId, string? searchTerm, DateTime? startDate, DateTime? endDate, int pageNumber, int pageSize, CancellationToken cancellationToken);
 
     /// <summary>
     /// Payment INSERT + CurrentAccount.Balance -= Amount — tek transaction.

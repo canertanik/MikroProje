@@ -10,7 +10,11 @@ public static class CacheKeys
     public const string SupplierPaymentsPrefix = "supplierpayments:";
 
     // Dashboard
-    public static string DashboardSummary() => $"{DashboardPrefix}summary";
+    public static string DashboardSummary(DateTime? start, DateTime? end) => $"{DashboardPrefix}summary:{start:yyyyMMdd}:{end:yyyyMMdd}";
+    public static string DashboardTrends(DateTime? start, DateTime? end) => $"{DashboardPrefix}trends:{start:yyyyMMdd}:{end:yyyyMMdd}";
+    public static string DashboardActivities() => $"{DashboardPrefix}activities";
+    public static string DashboardCriticalStock() => $"{DashboardPrefix}criticalstock";
+    public static string DashboardTopRecords(DateTime? start, DateTime? end) => $"{DashboardPrefix}toprecords:{start:yyyyMMdd}:{end:yyyyMMdd}";
 
     // Products
     public static string ProductById(int id) => $"{ProductsPrefix}{id}";

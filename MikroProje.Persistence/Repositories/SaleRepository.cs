@@ -20,21 +20,37 @@ public class SaleRepository : ISaleRepository
     {
         return await _dbContext.Sales
             .Include(x => x.CurrentAccount)
+            .Include(x => x.Warehouse)
             .Include(x => x.Details)
                 .ThenInclude(d => d.Product)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
     public async Task<(IReadOnlyCollection<Sale> Items, int TotalCount)> GetAllAsync(
-        int pageNumber, int pageSize, CancellationToken cancellationToken)
+        string? search, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
         var query = _dbContext.Sales
             .AsNoTracking()
             .Include(x => x.CurrentAccount)
+            .Include(x => x.Warehouse)
             .Include(x => x.Details)
                 .ThenInclude(d => d.Product)
-            .Where(x => !x.IsDeleted)
-            .OrderByDescending(x => x.SaleDate);
+            .Where(x => !x.IsDeleted);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var cleanSearch = search.Trim();
+            
+            query = query.Where(x => 
+                x.Id.ToString().Contains(cleanSearch) ||
+                ("SAT-" + x.Id.ToString()).Contains(cleanSearch) ||
+                x.CurrentAccount.Name.Contains(cleanSearch) ||
+                x.CurrentAccount.Code.Contains(cleanSearch) ||
+                (x.Description != null && x.Description.Contains(cleanSearch))
+            );
+        }
+
+        query = query.OrderByDescending(x => x.SaleDate);
 
         var totalCount = await query.CountAsync(cancellationToken);
         var items = await query
@@ -51,6 +67,7 @@ public class SaleRepository : ISaleRepository
         var query = _dbContext.Sales
             .AsNoTracking()
             .Include(x => x.CurrentAccount)
+            .Include(x => x.Warehouse)
             .Include(x => x.Details)
                 .ThenInclude(d => d.Product)
             .Where(x => x.CurrentAccountId == currentAccountId && !x.IsDeleted)
@@ -133,6 +150,26 @@ public class SaleRepository : ISaleRepository
                 // 2c. Product stok güncelle (tracked entity)
                 product.StockQuantity = newQuantity;
                 product.UpdatedDate = DateTime.UtcNow;
+
+                // 2d. Warehouse stok güncelle
+                var warehouseStock = await _dbContext.ProductWarehouseStocks
+                    .FirstOrDefaultAsync(x => x.ProductId == product.Id && x.WarehouseId == sale.WarehouseId, cancellationToken);
+                
+                if (warehouseStock != null)
+                {
+                    warehouseStock.Quantity -= line.Quantity;
+                    // Note: if quantity goes negative, it's allowed for now, or we can throw
+                }
+                else
+                {
+                    // If it doesn't exist, we create it with negative balance
+                    await _dbContext.ProductWarehouseStocks.AddAsync(new ProductWarehouseStock
+                    {
+                        ProductId = product.Id,
+                        WarehouseId = sale.WarehouseId,
+                        Quantity = -line.Quantity
+                    }, cancellationToken);
+                }
             }
 
             // 3. CurrentAccount.Balance += GrandTotal
@@ -204,6 +241,7 @@ public class SaleRepository : ISaleRepository
                 // StockIn (ters hareket)
                 var reverseMovement = new StockMovement
                 {
+                    WarehouseId = sale.WarehouseId,
                     ProductId = product.Id,
                     MovementType = StockMovementType.StockIn,
                     SourceType = StockMovementSourceType.Return,
@@ -220,6 +258,23 @@ public class SaleRepository : ISaleRepository
                 // Product stok geri ekle
                 product.StockQuantity = newQuantity;
                 product.UpdatedDate = DateTime.UtcNow;
+
+                // Warehouse stok geri ekle
+                var warehouseStock = await _dbContext.ProductWarehouseStocks
+                    .FirstOrDefaultAsync(x => x.ProductId == product.Id && x.WarehouseId == sale.WarehouseId, cancellationToken);
+                if (warehouseStock != null)
+                {
+                    warehouseStock.Quantity += detail.Quantity;
+                }
+                else
+                {
+                    await _dbContext.ProductWarehouseStocks.AddAsync(new ProductWarehouseStock
+                    {
+                        ProductId = product.Id,
+                        WarehouseId = sale.WarehouseId,
+                        Quantity = detail.Quantity
+                    }, cancellationToken);
+                }
             }
 
             // CurrentAccount.Balance -= GrandTotal

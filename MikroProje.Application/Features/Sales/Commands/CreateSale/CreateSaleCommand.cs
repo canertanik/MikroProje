@@ -12,5 +12,7 @@ public class CreateSaleCommand : IRequest<Result<SaleDto>>
 
     public List<SaleItemDto> Items { get; set; } = new();
 
+    public DateTime? SaleDate { get; set; }
+
     public string? Description { get; set; }
 }

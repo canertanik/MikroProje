@@ -35,7 +35,7 @@ public class CreateSupplierPaymentCommandHandler : IRequestHandler<CreateSupplie
             return Result<SupplierPaymentDto>.Fail($"Cari hesap (Id={request.CurrentAccountId}) bulunamadı.", 404);
         }
 
-        if (currentAccount.Type != CurrentAccountType.Supplier)
+        if (currentAccount.Type != CurrentAccountType.Supplier && currentAccount.Type != CurrentAccountType.Both)
         {
             return Result<SupplierPaymentDto>.Fail("Ödeme işlemi yalnızca tedarikçi (Supplier) türündeki cariler için yapılabilir.", 400);
         }

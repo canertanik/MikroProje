@@ -45,9 +45,9 @@ public class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchaseComman
             return Result<PurchaseDto>.Fail($"CurrentAccount (Id={request.CurrentAccountId}) bulunamadı veya silinmiş.", 404);
         }
 
-        if (currentAccount.Type != CurrentAccountType.Supplier)
+        if (currentAccount.Type != CurrentAccountType.Supplier && currentAccount.Type != CurrentAccountType.Both)
         {
-            return Result<PurchaseDto>.Fail($"Seçilen cari hesap ({currentAccount.Name}) bir Tedarikçi değil.", 400);
+            return Result<PurchaseDto>.Fail("Satın alma işlemi yalnızca Tedarikçi (Supplier) türündeki cariler için yapılabilir.", 400);
         }
 
         // 1.5. Warehouse doğrulama
@@ -77,7 +77,7 @@ public class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchaseComman
                 return Result<PurchaseDto>.Fail($"Ürün (Id={item.ProductId}) bulunamadı veya silinmiş.", 404);
             }
 
-            var unitPrice = item.UnitPrice ?? product.PurchasePrice; // Satın almada PurchasePrice referans alınabilir
+            var unitPrice = item.UnitPrice ?? product.PurchasePrice;
             var lineSubtotal = unitPrice * item.Quantity;
             var lineVat = lineSubtotal * (product.VatRate / 100m);
             var lineTotal = lineSubtotal + lineVat;
@@ -87,7 +87,7 @@ public class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchaseComman
 
             lineItems.Add(new PurchaseItem
             {
-                Product = product, // Geçici olarak tutuluyor, ID'yi aşağıda repository alacak
+                Product = product,
                 ProductId = product.Id,
                 Quantity = item.Quantity,
                 UnitPrice = unitPrice,
@@ -103,7 +103,7 @@ public class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchaseComman
         if (purchaseDate.Kind == DateTimeKind.Local) purchaseDate = purchaseDate.ToUniversalTime();
         else if (purchaseDate.Kind == DateTimeKind.Unspecified) purchaseDate = DateTime.SpecifyKind(purchaseDate, DateTimeKind.Utc);
 
-        // 3. Purchase Entity oluşturma
+        // 3. Purchase Entity oluşturma (Status = Pending)
         var purchase = new Purchase
         {
             CurrentAccountId = request.CurrentAccountId,
@@ -116,18 +116,23 @@ public class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchaseComman
             CreatedDate = DateTime.UtcNow
         };
 
-        // 4. Transaction içinde kaydetme
+        // 4. Transaction içinde kaydetme — sadece Purchase + PurchaseItems
+        // Stok artışı, StockMovement ve tedarikçi bakiyesi "Depoya Giriş" (Receive) işleminde yapılacak
         try
         {
-            var created = await _purchaseRepository.CreatePurchaseAsync(purchase, lineItems, currentAccount, cancellationToken);
+            var created = await _purchaseRepository.CreatePurchaseAsync(purchase, lineItems, cancellationToken);
             
-            // Dashboard cache'i temizle — alış sonrası güncel veriler gösterilmeli
+            // Dashboard cache'i temizle
             await _cacheService.RemoveByPrefixAsync(CacheKeys.DashboardPrefix, cancellationToken);
             
             _metrics?.IncrementPurchasesCreated(1);
+
+            // Mapper için CurrentAccount set et
+            created.CurrentAccount = currentAccount;
+            created.Warehouse = warehouse;
             
             var dto = _mapper.Map<PurchaseDto>(created);
-            return Result<PurchaseDto>.Created(dto, "Satın alma işlemi başarıyla tamamlandı.");
+            return Result<PurchaseDto>.Created(dto, "Satın alma kaydı oluşturuldu. Depoya giriş işlemi bekleniyor.");
         }
         catch (ConcurrencyConflictException)
         {

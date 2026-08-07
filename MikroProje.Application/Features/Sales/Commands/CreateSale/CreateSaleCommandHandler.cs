@@ -44,6 +44,11 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Resul
             return Result<SaleDto>.Fail($"CurrentAccount (Id={request.CurrentAccountId}) bulunamadı veya silinmiş.", 404);
         }
 
+        if (currentAccount.Type != MikroProje.Domain.Enums.CurrentAccountType.Customer && currentAccount.Type != MikroProje.Domain.Enums.CurrentAccountType.Both)
+        {
+            return Result<SaleDto>.Fail("Satış işlemi yalnızca müşteri (Customer) türündeki cariler için yapılabilir.", 400);
+        }
+
         // 1.5. Warehouse kontrolü
         var warehouse = await _warehouseRepository.GetByIdAsync(request.WarehouseId, cancellationToken);
         if (warehouse is null)
@@ -93,7 +98,7 @@ public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Resul
         {
             CurrentAccountId = request.CurrentAccountId,
             WarehouseId = request.WarehouseId,
-            SaleDate = DateTime.UtcNow,
+            SaleDate = request.SaleDate ?? DateTime.UtcNow,
             TotalAmount = Math.Round(totalAmount, 2),
             VatAmount = Math.Round(vatAmount, 2),
             GrandTotal = Math.Round(grandTotal, 2),

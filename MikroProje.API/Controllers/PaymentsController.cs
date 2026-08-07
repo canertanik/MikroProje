@@ -51,18 +51,10 @@ public class PaymentsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(Result<PagedResult<PaymentDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(
-        [FromQuery] int? currentAccountId,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 20,
+        [FromQuery] GetPaymentsQuery query,
         CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetPaymentsQuery
-        {
-            CurrentAccountId = currentAccountId,
-            PageNumber = pageNumber,
-            PageSize = pageSize
-        }, cancellationToken);
-
+        var result = await _mediator.Send(query, cancellationToken);
         return StatusCode(result.StatusCode, result);
     }
 

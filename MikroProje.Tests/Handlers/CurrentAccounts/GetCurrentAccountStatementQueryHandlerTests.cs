@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using MikroProje.Application.Features.CurrentAccounts.Queries.GetStatement;
 using MikroProje.Application.Interfaces;
@@ -24,7 +24,7 @@ public class GetCurrentAccountStatementQueryHandlerTests : TestBase
     {
         var command = new GetCurrentAccountStatementQuery { CurrentAccountId = 1, PageNumber = 1, PageSize = 10 };
 
-        _repositoryMock.Setup(r => r.ExistsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _repositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(new CurrentAccount { Id = 1, Type = MikroProje.Domain.Enums.CurrentAccountType.Customer });
 
         var transactions = new List<StatementDto>
         {
@@ -50,7 +50,7 @@ public class GetCurrentAccountStatementQueryHandlerTests : TestBase
     {
         var command = new GetCurrentAccountStatementQuery { CurrentAccountId = 1 };
 
-        _repositoryMock.Setup(r => r.ExistsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _repositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync((CurrentAccount)null);
 
         var result = await _handler.Handle(command, CancellationToken.None);
 

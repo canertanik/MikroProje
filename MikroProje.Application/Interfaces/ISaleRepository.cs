@@ -7,7 +7,7 @@ public interface ISaleRepository
     Task<Sale?> GetByIdAsync(int id, CancellationToken cancellationToken);
 
     Task<(IReadOnlyCollection<Sale> Items, int TotalCount)> GetAllAsync(
-        int pageNumber, int pageSize, CancellationToken cancellationToken);
+        string? search, int pageNumber, int pageSize, CancellationToken cancellationToken);
 
     Task<(IReadOnlyCollection<Sale> Items, int TotalCount)> GetByCurrentAccountAsync(
         int currentAccountId, int pageNumber, int pageSize, CancellationToken cancellationToken);

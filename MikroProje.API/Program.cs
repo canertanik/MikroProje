@@ -26,6 +26,20 @@ builder.Services.AddHealthChecks()
         builder.Configuration["Redis:ConnectionString"]!,
         name: "redis",
         tags: new[] { "ready" });
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        if (allowedOrigins.Length > 0)
+        {
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<MikroProje.Application.Interfaces.ICurrentUserService, MikroProje.API.Services.CurrentUserService>();
@@ -138,6 +152,7 @@ app.UseMiddleware<MikroProje.API.Middlewares.GlobalExceptionMiddleware>();
 
 app.UseRouting();
 app.UseRateLimiter();
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();

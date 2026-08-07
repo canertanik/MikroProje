@@ -27,3 +27,13 @@ Thumbs.db
 logs/
 api_out.txt
 api_err.txt
+
+# Temporary files and tools
+token.txt
+api_out.txt
+api_err.txt
+test.py
+TestApp/
+*.db
+
+frontend/lint_output.txt

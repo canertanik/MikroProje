@@ -7,4 +7,5 @@ public class PurchaseListDto
     public DateTime PurchaseDate { get; set; }
     public decimal GrandTotal { get; set; }
     public string? Description { get; set; }
+    public int Status { get; set; }
 }

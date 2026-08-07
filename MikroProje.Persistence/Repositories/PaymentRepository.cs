@@ -23,7 +23,7 @@ public class PaymentRepository : IPaymentRepository
     }
 
     public async Task<(IReadOnlyCollection<Payment> Items, int TotalCount)> GetAllAsync(
-        int? currentAccountId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+        int? currentAccountId, string? searchTerm, DateTime? startDate, DateTime? endDate, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
         var query = _dbContext.Payments
             .Include(p => p.CurrentAccount)
@@ -32,6 +32,35 @@ public class PaymentRepository : IPaymentRepository
         if (currentAccountId.HasValue)
         {
             query = query.Where(p => p.CurrentAccountId == currentAccountId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.ToLower().Trim();
+            
+            var termForId = term.Replace("#", "").Trim();
+            if (termForId.StartsWith("0"))
+                termForId = termForId.TrimStart('0');
+            
+            if (string.IsNullOrEmpty(termForId))
+                termForId = term;
+
+            bool isNumericId = int.TryParse(termForId, out int searchId);
+
+            query = query.Where(p => (isNumericId && p.Id == searchId) || 
+                                     p.CurrentAccount.Name.ToLower().Contains(term) ||
+                                     (p.Description != null && p.Description.ToLower().Contains(term)));
+        }
+
+        if (startDate.HasValue)
+        {
+            query = query.Where(p => p.PaymentDate >= startDate.Value.Date);
+        }
+
+        if (endDate.HasValue)
+        {
+            var end = endDate.Value.Date.AddDays(1).AddTicks(-1);
+            query = query.Where(p => p.PaymentDate <= end);
         }
 
         query = query.OrderByDescending(p => p.PaymentDate).ThenByDescending(p => p.CreatedDate);

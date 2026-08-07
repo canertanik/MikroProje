@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MikroProje.Application.Common.Exceptions;
 using MikroProje.Application.Common.Pagination;
 using MikroProje.Application.Features.StockTransfers.DTOs;
@@ -134,7 +134,8 @@ public class StockTransferRepository : IStockTransferRepository
                 DestinationWarehouseCode = t.DestinationWarehouse.Code,
                 TransferDate = t.TransferDate,
                 Status = t.Status,
-                CreatedDate = t.CreatedDate
+                CreatedDate = t.CreatedDate,
+                RowVersion = t.RowVersion
             })
             .ToListAsync(cancellationToken);
 

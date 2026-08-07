@@ -21,7 +21,13 @@ public class GetPaymentsQueryHandler : IRequestHandler<GetPaymentsQuery, Result<
     public async Task<Result<PagedResult<PaymentDto>>> Handle(GetPaymentsQuery request, CancellationToken cancellationToken)
     {
         var (items, totalCount) = await _paymentRepository.GetAllAsync(
-            request.CurrentAccountId, request.PageNumber, request.PageSize, cancellationToken);
+            request.CurrentAccountId,
+            request.SearchTerm,
+            request.StartDate,
+            request.EndDate,
+            request.PageNumber, 
+            request.PageSize, 
+            cancellationToken);
 
         var dtos = _mapper.Map<IReadOnlyCollection<PaymentDto>>(items);
         var pagedResult = PagedResult<PaymentDto>.Create(dtos, request.PageNumber, request.PageSize, totalCount);

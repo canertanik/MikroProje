@@ -7,6 +7,10 @@ namespace MikroProje.Application.Features.Purchases.Queries.GetAllPurchases;
 
 public class GetAllPurchasesQuery : IRequest<Result<PagedResult<PurchaseListDto>>>
 {
+    public string? SearchTerm { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public MikroProje.Domain.Enums.PurchaseStatus? Status { get; set; }
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 20;
 }

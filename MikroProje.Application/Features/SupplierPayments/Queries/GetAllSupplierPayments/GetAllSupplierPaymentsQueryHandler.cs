@@ -21,7 +21,13 @@ public class GetAllSupplierPaymentsQueryHandler : IRequestHandler<GetAllSupplier
     public async Task<Result<PagedResult<SupplierPaymentListDto>>> Handle(GetAllSupplierPaymentsQuery request, CancellationToken cancellationToken)
     {
         var (items, totalCount) = await _supplierPaymentRepository.GetAllAsync(
-            request.CurrentAccountId, request.PageNumber, request.PageSize, cancellationToken);
+            request.CurrentAccountId,
+            request.SearchTerm,
+            request.StartDate,
+            request.EndDate,
+            request.PageNumber, 
+            request.PageSize, 
+            cancellationToken);
 
         var dtos = _mapper.Map<IReadOnlyCollection<SupplierPaymentListDto>>(items);
 

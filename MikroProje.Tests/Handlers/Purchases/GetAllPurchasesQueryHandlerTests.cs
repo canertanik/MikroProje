@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using MikroProje.Application.Features.Purchases.Queries.GetAllPurchases;
 using MikroProje.Application.Interfaces;
@@ -28,7 +28,7 @@ public class GetAllPurchasesQueryHandlerTests : TestBase
         };
         var totalCount = 2;
 
-        _repositoryMock.Setup(r => r.GetAllAsync(1, 10, It.IsAny<CancellationToken>()))
+        _repositoryMock.Setup(r => r.GetAllAsync(It.IsAny<string?>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<MikroProje.Domain.Enums.PurchaseStatus?>(), 1, 10, It.IsAny<CancellationToken>()))
             .ReturnsAsync((purchases, totalCount));
 
         var query = new GetAllPurchasesQuery { PageNumber = 1, PageSize = 10 };

@@ -59,5 +59,9 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         {
             return Result<ProductDto>.Fail("Concurrent update detected.", 409);
         }
+        catch (InvalidOperationException ex)
+        {
+            return Result<ProductDto>.Fail(ex.Message, 400);
+        }
     }
 }

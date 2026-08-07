@@ -101,9 +101,28 @@ public class ProductRepository : IProductRepository
 
             if (initialStockQuantity > 0)
             {
+                var defaultWarehouse = await _dbContext.Warehouses
+                    .Where(x => x.IsDefault && !x.IsDeleted)
+                    .FirstOrDefaultAsync(cancellationToken) 
+                    ?? await _dbContext.Warehouses.Where(x => !x.IsDeleted).FirstOrDefaultAsync(cancellationToken);
+
+                if (defaultWarehouse == null)
+                {
+                    defaultWarehouse = new Warehouse
+                    {
+                        Code = "MRK",
+                        Name = "Merkez Depo",
+                        IsDefault = true,
+                        IsActive = true
+                    };
+                    await _dbContext.Warehouses.AddAsync(defaultWarehouse, cancellationToken);
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+                }
+
                 var movement = new StockMovement
                 {
                     ProductId = product.Id,
+                    WarehouseId = defaultWarehouse.Id,
                     MovementType = StockMovementType.StockIn,
                     SourceType = StockMovementSourceType.Manual,
                     Quantity = initialStockQuantity,
@@ -113,10 +132,18 @@ public class ProductRepository : IProductRepository
                     MovementDate = DateTime.UtcNow
                 };
 
+                var warehouseStock = new ProductWarehouseStock
+                {
+                    ProductId = product.Id,
+                    WarehouseId = defaultWarehouse.Id,
+                    Quantity = initialStockQuantity
+                };
+
                 product.StockQuantity = initialStockQuantity;
                 product.UpdatedDate = DateTime.UtcNow;
 
                 await _dbContext.StockMovements.AddAsync(movement, cancellationToken);
+                await _dbContext.ProductWarehouseStocks.AddAsync(warehouseStock, cancellationToken);
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
 
@@ -133,6 +160,14 @@ public class ProductRepository : IProductRepository
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
+    }
+    public async Task<List<ProductWarehouseStock>> GetWarehouseStocksAsync(int productId, CancellationToken cancellationToken)
+    {
+        return await _dbContext.ProductWarehouseStocks
+            .Include(x => x.Warehouse)
+            .Where(x => x.ProductId == productId && !x.Warehouse.IsDeleted && x.Quantity > 0)
+            .OrderBy(x => x.Warehouse.Name)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task DeleteSoftAsync(Product product, CancellationToken cancellationToken)

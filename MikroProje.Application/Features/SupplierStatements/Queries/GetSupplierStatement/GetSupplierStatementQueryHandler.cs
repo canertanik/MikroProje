@@ -31,7 +31,7 @@ public class GetSupplierStatementQueryHandler : IRequestHandler<GetSupplierState
             return Result<SupplierStatementResponseDto>.Fail("Current account not found.", 404);
         }
 
-        if (currentAccount.Type != CurrentAccountType.Supplier)
+        if (currentAccount.Type != CurrentAccountType.Supplier && currentAccount.Type != CurrentAccountType.Both)
         {
             return Result<SupplierStatementResponseDto>.Fail("Only supplier current accounts can have supplier statements.", 400);
         }

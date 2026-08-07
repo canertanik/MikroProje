@@ -9,6 +9,7 @@ using MikroProje.Application.Features.Products.DTOs;
 using MikroProje.Application.Features.Products.Queries.GetAllProducts;
 using MikroProje.Application.Features.Products.Queries.GetCriticalStockProducts;
 using MikroProje.Application.Features.Products.Queries.GetProductById;
+using MikroProje.Application.Features.Products.Queries.GetProductStocks;
 using MikroProje.Application.Features.Products.Queries.ExportProductsExcel;
 using MikroProje.Application.Features.Products.Queries.ExportProductsPdf;
 using Microsoft.AspNetCore.Mvc;
@@ -187,7 +188,13 @@ public class ProductsController : ControllerBase
         }
         return BadRequest(result.Message);
     }
+
+    [HttpGet("{id:int}/stocks")]
+    [ProducesResponseType(typeof(Result<List<ProductStockDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetStocks(int id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetProductStocksQuery { ProductId = id }, cancellationToken);
+        return StatusCode(result.StatusCode, result);
+    }
 }
-
-
-

@@ -21,10 +21,19 @@ public static class ObservabilityExtensions
             .ReadFrom.Configuration(builder.Configuration)
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
             .Enrich.FromLogContext()
             .Enrich.WithProperty("Application", options.ServiceName)
-            .Enrich.WithProperty("Environment", builder.Environment.EnvironmentName)
-            .WriteTo.Console(new RenderedCompactJsonFormatter());
+            .Enrich.WithProperty("Environment", builder.Environment.EnvironmentName);
+
+        if (builder.Environment.IsDevelopment())
+        {
+            loggerConfig.WriteTo.Console(); // Normal readable text for devs
+        }
+        else
+        {
+            loggerConfig.WriteTo.Console(new RenderedCompactJsonFormatter());
+        }
 
         if (options.Serilog.EnableFileLogging)
         {

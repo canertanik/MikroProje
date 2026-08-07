@@ -21,6 +21,7 @@ public interface IProductRepository
     Task SaveChangesAsync(CancellationToken cancellationToken);
 
     Task<Product> CreateWithInitialStockAsync(Product product, int initialStockQuantity, CancellationToken cancellationToken);
+    Task<List<ProductWarehouseStock>> GetWarehouseStocksAsync(int productId, CancellationToken cancellationToken);
 
     Task DeleteSoftAsync(Product product, CancellationToken cancellationToken);
 }

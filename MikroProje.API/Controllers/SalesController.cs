@@ -33,6 +33,7 @@ public class SalesController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(Result<PagedResult<SaleDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(
+        [FromQuery] string? search,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
@@ -41,6 +42,7 @@ public class SalesController : ControllerBase
         {
             var result = await _mediator.Send(new GetAllSalesQuery
             {
+                Search = search,
                 PageNumber = pageNumber,
                 PageSize = pageSize
             }, cancellationToken);

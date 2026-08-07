@@ -20,7 +20,14 @@ public class GetAllPurchasesQueryHandler : IRequestHandler<GetAllPurchasesQuery,
 
     public async Task<Result<PagedResult<PurchaseListDto>>> Handle(GetAllPurchasesQuery request, CancellationToken cancellationToken)
     {
-        var (items, totalCount) = await _purchaseRepository.GetAllAsync(request.PageNumber, request.PageSize, cancellationToken);
+        var (items, totalCount) = await _purchaseRepository.GetAllAsync(
+            request.SearchTerm,
+            request.StartDate,
+            request.EndDate,
+            request.Status,
+            request.PageNumber, 
+            request.PageSize, 
+            cancellationToken);
         
         var dtoList = _mapper.Map<List<PurchaseListDto>>(items);
         var pagedResult = PagedResult<PurchaseListDto>.Create(dtoList, request.PageNumber, request.PageSize, totalCount);

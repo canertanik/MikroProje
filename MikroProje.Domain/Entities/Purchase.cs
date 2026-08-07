@@ -1,4 +1,5 @@
 using MikroProje.Domain.Common;
+using MikroProje.Domain.Enums;
 
 namespace MikroProje.Domain.Entities;
 
@@ -21,6 +22,10 @@ public class Purchase : BaseEntity
     public decimal GrandTotal { get; set; }
 
     public string? Description { get; set; }
+
+    public PurchaseStatus Status { get; set; } = PurchaseStatus.Pending;
+
+    public DateTime? ReceivedDate { get; set; }
 
     public ICollection<PurchaseItem> Items { get; set; } = new List<PurchaseItem>();
 }

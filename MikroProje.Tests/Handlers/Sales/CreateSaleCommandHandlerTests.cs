@@ -49,7 +49,7 @@ public class CreateSaleCommandHandlerTests : TestBase
             }
         };
 
-        var account = new CurrentAccount { Id = command.CurrentAccountId };
+        var account = new CurrentAccount { Id = command.CurrentAccountId, Type = MikroProje.Domain.Enums.CurrentAccountType.Customer };
         var product = new Product { Id = command.Items[0].ProductId, StockQuantity = 10, SalePrice = 50, VatRate = 18 };
         var warehouse = new Warehouse { Id = 1, IsActive = true, Name = "Main" };
 
@@ -107,7 +107,7 @@ public class CreateSaleCommandHandlerTests : TestBase
             }
         };
 
-        var account = new CurrentAccount { Id = command.CurrentAccountId };
+        var account = new CurrentAccount { Id = command.CurrentAccountId, Type = MikroProje.Domain.Enums.CurrentAccountType.Customer };
         _accountRepoMock.Setup(r => r.GetByIdAsync(command.CurrentAccountId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(account);
 
@@ -137,7 +137,7 @@ public class CreateSaleCommandHandlerTests : TestBase
             }
         };
 
-        var account = new CurrentAccount { Id = command.CurrentAccountId };
+        var account = new CurrentAccount { Id = command.CurrentAccountId, Type = MikroProje.Domain.Enums.CurrentAccountType.Customer };
         var product = new Product { Id = command.Items[0].ProductId, StockQuantity = 2 }; // Less than requested
         var warehouse = new Warehouse { Id = 1, IsActive = true, Name = "Main" };
 
@@ -173,7 +173,7 @@ public class CreateSaleCommandHandlerTests : TestBase
             }
         };
 
-        var account = new CurrentAccount { Id = command.CurrentAccountId };
+        var account = new CurrentAccount { Id = command.CurrentAccountId, Type = MikroProje.Domain.Enums.CurrentAccountType.Customer };
         var product = new Product { Id = command.Items[0].ProductId, StockQuantity = 10 };
         var warehouse = new Warehouse { Id = 1, IsActive = true, Name = "Main" };
 
@@ -201,7 +201,7 @@ public class CreateSaleCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturn404_WhenWarehouseNotFound()
     {
         var command = new CreateSaleCommand { CurrentAccountId = 1, WarehouseId = 99, Items = new List<SaleItemDto> { new() { ProductId = 1, Quantity = 1 } } };
-        var account = new CurrentAccount { Id = 1 };
+        var account = new CurrentAccount { Id = 1, Type = MikroProje.Domain.Enums.CurrentAccountType.Customer };
         _accountRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(account);
         _warehouseRepoMock.Setup(x => x.GetByIdAsync(99, It.IsAny<CancellationToken>())).ReturnsAsync((Warehouse?)null);
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -213,7 +213,7 @@ public class CreateSaleCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturn422_WhenWarehouseIsPassive()
     {
         var command = new CreateSaleCommand { CurrentAccountId = 1, WarehouseId = 2, Items = new List<SaleItemDto> { new() { ProductId = 1, Quantity = 1 } } };
-        var account = new CurrentAccount { Id = 1 };
+        var account = new CurrentAccount { Id = 1, Type = MikroProje.Domain.Enums.CurrentAccountType.Customer };
         var warehouse = new Warehouse { Id = 2, IsActive = false, Name = "Passive" };
         _accountRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(account);
         _warehouseRepoMock.Setup(x => x.GetByIdAsync(2, It.IsAny<CancellationToken>())).ReturnsAsync(warehouse);

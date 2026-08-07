@@ -27,7 +27,7 @@ public class CreatePaymentCommandHandlerTests : TestBase
     [Fact]
     public async Task Handle_ShouldReturnSuccess_WhenAccountExists()
     {
-        var account = new CurrentAccount { Id = 1, Name = "Test" };
+        var account = new CurrentAccount { Id = 1, Name = "Test", Type = MikroProje.Domain.Enums.CurrentAccountType.Customer, Balance = 150 };
         _currentAccountRepositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(account);
 
         var payment = new Payment { Id = 1, CurrentAccountId = 1, Amount = 100, Type = PaymentType.Collection };

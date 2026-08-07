@@ -12,5 +12,7 @@ public class PurchaseDto
     public decimal VatAmount { get; set; }
     public decimal GrandTotal { get; set; }
     public string? Description { get; set; }
+    public int Status { get; set; }
+    public DateTime? ReceivedDate { get; set; }
     public List<PurchaseItemDto> Items { get; set; } = new();
 }

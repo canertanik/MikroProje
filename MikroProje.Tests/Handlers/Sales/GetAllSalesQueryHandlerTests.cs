@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Moq;
 using MikroProje.Application.Features.Sales.Queries.GetAllSales;
 using MikroProje.Application.Interfaces;
@@ -28,7 +28,7 @@ public class GetAllSalesQueryHandlerTests : TestBase
         };
         var totalCount = 2;
 
-        _repositoryMock.Setup(r => r.GetAllAsync(1, 10, It.IsAny<CancellationToken>()))
+        _repositoryMock.Setup(r => r.GetAllAsync(It.IsAny<string?>(), 1, 10, It.IsAny<CancellationToken>()))
             .ReturnsAsync((sales, totalCount));
 
         var query = new GetAllSalesQuery { PageNumber = 1, PageSize = 10 };

@@ -239,3 +239,26 @@ Bu endpointler kimlik doğrulama gerektirmez ve rate limiting kısıtlamalarına
 
 ### Docker Kullanımı
 `docker-compose.yml` içinde API container'ının hazır olduğunu kontrol etmek için `curl -f http://localhost:8080/health/live` komutu kullanılmaktadır. Böylece SQL ve Redis'e olan bağımlılık `depends_on: condition: service_healthy` ile yönetilirken, uygulamanın kendisinin çöktüğü (veya HTTP trafiği almadığı) durumlarda Docker Health Check mekanizması API'yi yeniden başlatabilir.
+
+## 🎨 Frontend (ERP Admin Paneli)
+
+Projenin içinde modern bir React tabanlı SPA (Single Page Application) admin paneli de barındırılmaktadır. 
+Backend API'siyle haberleşen frontend projesi `frontend` klasörü altında yer alır.
+
+**Teknolojiler:**
+- React (Vite & TypeScript)
+- Tailwind CSS v4
+- TanStack Query (Veri Senkronizasyonu)
+- Zustand (Global State ve Kimlik Doğrulama)
+- React Router DOM
+- React Hook Form & Zod (Form Validasyonu)
+- Axios & Interceptor (Bearer Token yönetimi)
+
+**Kurulum ve Çalıştırma:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+*Not: `frontend/.env` dosyası içerisinde `VITE_API_BASE_URL` ayarının arka uç sunucu adresiyle (varsayılan: `http://localhost:5097`) eşleştiğinden emin olun.*

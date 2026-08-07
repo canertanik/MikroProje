@@ -28,7 +28,7 @@ public class GetAllSupplierPaymentsQueryHandlerTests : TestBase
             new SupplierPayment { Id = 2, CurrentAccountId = 1, Amount = 200 }
         };
 
-        _supplierPaymentRepositoryMock.Setup(r => r.GetAllAsync(1, 1, 10, It.IsAny<CancellationToken>()))
+        _supplierPaymentRepositoryMock.Setup(r => r.GetAllAsync(It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), 1, 10, It.IsAny<CancellationToken>()))
             .ReturnsAsync((payments, 2));
 
         var query = new GetAllSupplierPaymentsQuery { CurrentAccountId = 1, PageNumber = 1, PageSize = 10 };

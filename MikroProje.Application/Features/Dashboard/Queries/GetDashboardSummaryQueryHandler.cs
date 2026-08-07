@@ -25,21 +25,14 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
 
     public async Task<Result<DashboardSummaryDto>> Handle(GetDashboardSummaryQuery request, CancellationToken cancellationToken)
     {
-        var cacheKey = CacheKeys.DashboardSummary();
+        var cacheKey = CacheKeys.DashboardSummary(request.StartDate, request.EndDate);
         var expiration = TimeSpan.FromMinutes(_redisOptions.DashboardExpirationMinutes);
 
         var result = await _cacheService.GetOrCreateAsync(
             cacheKey,
             async (ct) =>
             {
-                var now = DateTime.UtcNow; // Or project specific standard
-                var todayStart = now.Date;
-                var tomorrowStart = todayStart.AddDays(1);
-                
-                var monthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-                var nextMonthStart = monthStart.AddMonths(1);
-
-                var dbResult = await _dashboardRepository.GetSummaryAsync(todayStart, tomorrowStart, monthStart, nextMonthStart, ct);
+                var dbResult = await _dashboardRepository.GetSummaryAsync(request.StartDate, request.EndDate, ct);
                 return Result<DashboardSummaryDto>.Ok(dbResult);
             },
             expiration,

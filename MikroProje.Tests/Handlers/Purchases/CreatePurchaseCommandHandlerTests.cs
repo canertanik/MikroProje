@@ -64,8 +64,8 @@ public class CreatePurchaseCommandHandlerTests : TestBase
         _productRepoMock.Setup(r => r.GetByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Product> { product });
 
-        _purchaseRepoMock.Setup(r => r.CreatePurchaseAsync(It.IsAny<Purchase>(), It.IsAny<List<PurchaseItem>>(), It.IsAny<CurrentAccount>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Purchase p, List<PurchaseItem> items, CurrentAccount a, CancellationToken ct) => p);
+        _purchaseRepoMock.Setup(r => r.CreatePurchaseAsync(It.IsAny<Purchase>(), It.IsAny<List<PurchaseItem>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Purchase p, List<PurchaseItem> items, CancellationToken ct) => p);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -75,7 +75,7 @@ public class CreatePurchaseCommandHandlerTests : TestBase
         result.StatusCode.Should().Be(201);
         result.Data.Should().NotBeNull();
         
-        _purchaseRepoMock.Verify(r => r.CreatePurchaseAsync(It.IsAny<Purchase>(), It.IsAny<List<PurchaseItem>>(), It.IsAny<CurrentAccount>(), It.IsAny<CancellationToken>()), Times.Once);
+        _purchaseRepoMock.Verify(r => r.CreatePurchaseAsync(It.IsAny<Purchase>(), It.IsAny<List<PurchaseItem>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -172,7 +172,7 @@ public class CreatePurchaseCommandHandlerTests : TestBase
         _productRepoMock.Setup(r => r.GetByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Product> { product });
 
-        _purchaseRepoMock.Setup(r => r.CreatePurchaseAsync(It.IsAny<Purchase>(), It.IsAny<List<PurchaseItem>>(), It.IsAny<CurrentAccount>(), It.IsAny<CancellationToken>()))
+        _purchaseRepoMock.Setup(r => r.CreatePurchaseAsync(It.IsAny<Purchase>(), It.IsAny<List<PurchaseItem>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ConcurrencyConflictException("conflict"));
 
         // Act
@@ -211,8 +211,8 @@ public class CreatePurchaseCommandHandlerTests : TestBase
         _productRepoMock.Setup(r => r.GetByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Product> { product });
 
-        _purchaseRepoMock.Setup(r => r.CreatePurchaseAsync(It.IsAny<Purchase>(), It.IsAny<List<PurchaseItem>>(), It.IsAny<CurrentAccount>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Purchase p, List<PurchaseItem> items, CurrentAccount a, CancellationToken ct) => p);
+        _purchaseRepoMock.Setup(r => r.CreatePurchaseAsync(It.IsAny<Purchase>(), It.IsAny<List<PurchaseItem>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Purchase p, List<PurchaseItem> items, CancellationToken ct) => p);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

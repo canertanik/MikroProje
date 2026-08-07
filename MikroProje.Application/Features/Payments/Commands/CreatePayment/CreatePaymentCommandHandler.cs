@@ -35,6 +35,16 @@ public class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand,
             return Result<PaymentDto>.Fail($"Cari hesap (Id={request.CurrentAccountId}) bulunamadı.", 404);
         }
 
+        if (currentAccount.Type != CurrentAccountType.Customer && currentAccount.Type != CurrentAccountType.Both)
+        {
+            return Result<PaymentDto>.Fail("Tahsilat işlemi yalnızca müşteri (Customer) veya Both türündeki cariler için yapılabilir.", 400);
+        }
+
+        if (request.Type == PaymentType.Collection && request.Amount > currentAccount.Balance)
+        {
+            return Result<PaymentDto>.Fail($"Tahsilat tutarı ({request.Amount:N2} TL) müşterinin mevcut borcundan ({currentAccount.Balance:N2} TL) büyük olamaz.", 400);
+        }
+
         var payment = new Payment
         {
             CurrentAccountId = request.CurrentAccountId,

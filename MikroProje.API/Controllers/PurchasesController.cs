@@ -7,6 +7,9 @@ using MikroProje.Application.Features.Purchases.Commands.CreatePurchase;
 using MikroProje.Application.Features.Purchases.DTOs;
 using MikroProje.Application.Features.Purchases.Queries.GetAllPurchases;
 using MikroProje.Application.Features.Purchases.Queries.GetPurchaseById;
+using MikroProje.Application.Features.Purchases.Commands.ReceivePurchase;
+using MikroProje.Application.Features.Purchases.Commands.CancelPurchase;
+using MikroProje.Application.Features.Purchases.Commands.DeletePurchase;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MikroProje.API.Controllers;
@@ -85,6 +88,42 @@ public class PurchasesController : ControllerBase
             return File(result.Data.Content, result.Data.ContentType, result.Data.FileName);
         }
         return BadRequest(result.Message);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("{id}/receive")]
+    [ProducesResponseType(typeof(Result<PurchaseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Receive(int id, CancellationToken cancellationToken)
+    {
+        var command = new ReceivePurchaseCommand { Id = id };
+        var result = await _mediator.Send(command, cancellationToken);
+        return StatusCode(result.StatusCode, result);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("{id}/cancel")]
+    [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Cancel(int id, CancellationToken cancellationToken)
+    {
+        var command = new CancelPurchaseCommand { Id = id };
+        var result = await _mediator.Send(command, cancellationToken);
+        return StatusCode(result.StatusCode, result);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("{id}")]
+    [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        var command = new DeletePurchaseCommand { Id = id };
+        var result = await _mediator.Send(command, cancellationToken);
+        return StatusCode(result.StatusCode, result);
     }
 }
 
