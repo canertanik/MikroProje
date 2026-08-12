@@ -1,4 +1,4 @@
-using System.Text.Json;
+ï»¿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using MikroProje.Application.Interfaces;
@@ -43,12 +43,12 @@ public class MikroProjeDbContext : DbContext, IApplicationDbContext
 
     public override int SaveChanges()
     {
-        throw new NotSupportedException("Lütfen SaveChangesAsync metodunu kullanýnýz.");
+        throw new NotSupportedException("LÃ¼tfen SaveChangesAsync metodunu kullanÄ±nÄ±z.");
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        throw new NotSupportedException("Lütfen SaveChangesAsync metodunu kullanýnýz.");
+        throw new NotSupportedException("LÃ¼tfen SaveChangesAsync metodunu kullanÄ±nÄ±z.");
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -193,7 +193,7 @@ public class MikroProjeDbContext : DbContext, IApplicationDbContext
                 }
             }
             
-            // Eðer modified entity ise ancak hiçbir kolon deðiþmemiþse veya hepsi hassas ise kaydetme
+            // EÄŸer modified entity ise ancak hiÃ§bir kolon deÄŸiÅŸmemiÅŸse veya hepsi hassas ise kaydetme
             if ((action == AuditAction.Update || action == AuditAction.SoftDelete) && changedColumns.Count == 0)
             {
                 continue;
@@ -264,4 +264,5 @@ public class AuditEntryDraft
         };
     }
 }
+
 
