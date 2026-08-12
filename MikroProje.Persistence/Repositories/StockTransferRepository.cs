@@ -154,10 +154,14 @@ public class StockTransferRepository : IStockTransferRepository
 
     public async Task CompleteTransferAsync(int transferId, byte[] rowVersion, CancellationToken cancellationToken)
     {
-        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-        
-        try
+        var strategy = _context.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
         {
+            await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
             var transfer = await _context.StockTransfers
                 .Include(t => t.SourceWarehouse)
                 .Include(t => t.DestinationWarehouse)
@@ -278,15 +282,20 @@ public class StockTransferRepository : IStockTransferRepository
         {
             await transaction.RollbackAsync(cancellationToken);
             throw;
-        }
+            }
+        });
     }
 
     public async Task CancelTransferAsync(int transferId, byte[] rowVersion, CancellationToken cancellationToken)
     {
-        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-        
-        try
+        var strategy = _context.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
         {
+            await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
             var transfer = await _context.StockTransfers
                 .FirstOrDefaultAsync(t => t.Id == transferId && !t.IsDeleted, cancellationToken);
 
@@ -317,6 +326,7 @@ public class StockTransferRepository : IStockTransferRepository
         {
             await transaction.RollbackAsync(cancellationToken);
             throw;
-        }
+            }
+        });
     }
 }
