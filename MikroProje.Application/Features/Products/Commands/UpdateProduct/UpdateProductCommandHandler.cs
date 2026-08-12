@@ -53,6 +53,7 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
         try
         {
             await _productRepository.SaveChangesAsync(cancellationToken);
+            await _cacheService.RemoveByPrefixAsync(CacheKeys.DashboardPrefix, cancellationToken);
             var dto = _mapper.Map<ProductDto>(product);
             return Result<ProductDto>.Ok(dto, "Product updated successfully.");
         }

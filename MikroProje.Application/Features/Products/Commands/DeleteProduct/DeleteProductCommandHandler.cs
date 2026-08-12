@@ -28,6 +28,7 @@ public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand,
         try
         {
             await _productRepository.DeleteSoftAsync(product, cancellationToken);
+            await _cacheService.RemoveByPrefixAsync(CacheKeys.DashboardPrefix, cancellationToken);
             return Result<bool>.NoContent();
         }
         catch (ConcurrencyConflictException)

@@ -7,6 +7,15 @@ import type {
   StockTransferStatus
 } from './types';
 
+const getApiErrorMessage = (error: unknown, fallback: string) => {
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const response = (error as { response?: { data?: { message?: string } } }).response;
+    return response?.data?.message || fallback;
+  }
+
+  return error instanceof Error && error.message ? error.message : fallback;
+};
+
 export const getStockTransfers = async (
   pageNumber: number = 1,
   pageSize: number = 10,
@@ -59,21 +68,29 @@ export const createStockTransfer = async (command: CreateStockTransferRequestDto
 };
 
 export const completeStockTransfer = async ({ id, rowVersion }: { id: number, rowVersion: string }): Promise<boolean> => {
-  const response = await api.post<Result<boolean>>(`/api/stock-transfers/${id}/complete`, { rowVersion });
-  
-  if (response.data.success && response.data.data !== undefined && response.data.data !== null) {
-    return response.data.data;
+  try {
+    const response = await api.post<Result<boolean>>(`/api/stock-transfers/${id}/complete`, { rowVersion });
+
+    if (response.data.success && response.data.data !== undefined && response.data.data !== null) {
+      return response.data.data;
+    }
+
+    throw new Error(response.data.message || 'Transfer tamamlanırken bir hata oluştu');
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, 'Transfer tamamlanırken bir hata oluştu'));
   }
-  
-  throw new Error(response.data.message || 'Transfer tamamlanırken bir hata oluştu');
 };
 
 export const cancelStockTransfer = async ({ id, rowVersion }: { id: number, rowVersion: string }): Promise<boolean> => {
-  const response = await api.post<Result<boolean>>(`/api/stock-transfers/${id}/cancel`, { rowVersion });
-  
-  if (response.data.success && response.data.data !== undefined && response.data.data !== null) {
-    return response.data.data;
+  try {
+    const response = await api.post<Result<boolean>>(`/api/stock-transfers/${id}/cancel`, { rowVersion });
+
+    if (response.data.success && response.data.data !== undefined && response.data.data !== null) {
+      return response.data.data;
+    }
+
+    throw new Error(response.data.message || 'Transfer iptal edilirken bir hata oluştu');
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, 'Transfer iptal edilirken bir hata oluştu'));
   }
-  
-  throw new Error(response.data.message || 'Transfer iptal edilirken bir hata oluştu');
 };

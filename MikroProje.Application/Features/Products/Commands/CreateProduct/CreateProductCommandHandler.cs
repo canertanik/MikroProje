@@ -52,6 +52,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         try
         {
             var createdProduct = await _productRepository.CreateWithInitialStockAsync(product, request.InitialStockQuantity, cancellationToken);
+            await _cacheService.RemoveByPrefixAsync(CacheKeys.DashboardPrefix, cancellationToken);
             var dto = _mapper.Map<ProductDto>(createdProduct);
             return Result<ProductDto>.Created(dto, "Product created successfully.");
         }
