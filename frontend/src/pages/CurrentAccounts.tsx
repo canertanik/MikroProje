@@ -21,12 +21,9 @@ import { CurrentAccountForm } from '../features/current-accounts/components/Curr
 import type { CurrentAccountFormValues } from '../features/current-accounts/components/CurrentAccountForm';
 import { ConfirmDialog } from '../components/common/ConfirmDialog';
 import { formatCurrency } from '../lib/formatters';
-import { useAuthStore } from '../stores/useAuthStore';
 
 export const CurrentAccounts = () => {
   const queryClient = useQueryClient();
-  const { user } = useAuthStore();
-  const isAdmin = user?.role === 1;
   
   // State
   const [page, setPage] = useState(1);
@@ -155,15 +152,13 @@ export const CurrentAccounts = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-semibold text-gray-900">Cari Hesaplar</h1>
-        {isAdmin && (
-          <button
-            onClick={handleCreate}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Yeni Cari Hesap Ekle
-          </button>
-        )}
+        <button
+          onClick={handleCreate}
+          className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Yeni Cari Hesap Ekle
+        </button>
       </div>
 
       {/* Search and Filters */}
@@ -234,11 +229,9 @@ export const CurrentAccounts = () => {
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Bakiye
                   </th>
-                  {isAdmin && (
-                    <th scope="col" className="relative px-6 py-3">
-                      <span className="sr-only">İşlemler</span>
-                    </th>
-                  )}
+                  <th scope="col" className="relative px-6 py-3">
+                    <span className="sr-only">İşlemler</span>
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -273,24 +266,22 @@ export const CurrentAccounts = () => {
                         {formatCurrency(account.balance)}
                       </span>
                     </td>
-                    {isAdmin && (
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => handleEdit(account)}
-                          className="text-primary-600 hover:text-primary-900 mr-4"
-                          title="Düzenle"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(account)}
-                          className="text-red-600 hover:text-red-900"
-                          title="Sil"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    )}
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        onClick={() => handleEdit(account)}
+                        className="text-primary-600 hover:text-primary-900 mr-4"
+                        title="Düzenle"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(account)}
+                        className="text-red-600 hover:text-red-900"
+                        title="Sil"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

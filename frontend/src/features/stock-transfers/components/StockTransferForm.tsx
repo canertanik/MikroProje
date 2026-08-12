@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Plus, Trash2, AlertCircle } from 'lucide-react';
@@ -57,16 +57,14 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     enabled: isOpen,
   });
 
-  const warehouses = warehousesData?.items || [];
-  const products = productsData?.items || [];
 
   const warehouseOptions = useMemo(() => {
-    return warehouses.map(w => ({ value: w.id, label: `${w.code} - ${w.name}` }));
-  }, [warehouses]);
+    return (warehousesData?.items || []).map(w => ({ value: w.id, label: `${w.code} - ${w.name}` }));
+  }, [warehousesData]);
 
   const productOptions = useMemo(() => {
-    return products.map(p => ({ value: p.id, label: `${p.code} - ${p.name}` }));
-  }, [products]);
+    return (productsData?.items || []).map(p => ({ value: p.id, label: `${p.code} - ${p.name}` }));
+  }, [productsData]);
 
   const selectStyles = (isError: boolean) => ({
     control: (base: any, state: any) => ({
@@ -88,7 +86,6 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     control,
     handleSubmit,
     reset,
-    watch,
     formState: { errors },
   } = useForm<StockTransferFormValues>({
     resolver: zodResolver(formSchema),
@@ -105,7 +102,7 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     name: 'items',
   });
 
-  const watchItems = watch('items');
+  const watchItems = useWatch({ control, name: 'items' }) || [];
 
   useEffect(() => {
     if (isOpen) {
@@ -118,12 +115,12 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     }
   }, [isOpen, reset]);
 
-  // Product stock lookup
   const productStocks = useMemo(() => {
     const map = new Map<number, number>();
+    const products = productsData?.items || [];
     products.forEach(p => map.set(p.id, p.stockQuantity));
     return map;
-  }, [products]);
+  }, [productsData]);
 
   if (!isOpen) return null;
 

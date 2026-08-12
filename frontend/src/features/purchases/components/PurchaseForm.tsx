@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Plus, Trash2, Calculator, AlertCircle } from 'lucide-react';
@@ -68,13 +68,9 @@ export const PurchaseForm: React.FC<PurchaseFormProps> = ({
   });
 
   // Filter only suppliers and both
-  const accounts: any[] = useMemo(() => (accountsData || []).filter(a => a.type === CurrentAccountType.Supplier || a.type === CurrentAccountType.Both), [accountsData]);
-  const warehouses = warehousesData?.items || [];
-  const products = productsData?.items || [];
-
-  const accountOptions = useMemo(() => accounts.map((a: any) => ({ value: a.id, label: `${a.code} - ${a.name}` })), [accounts]);
-  const warehouseOptions = useMemo(() => warehouses.map((w: any) => ({ value: w.id, label: `${w.code} - ${w.name}` })), [warehouses]);
-  const productOptions = useMemo(() => products.map((p: any) => ({ value: p.id, label: `${p.code} - ${p.name}` })), [products]);
+  const accountOptions = useMemo(() => (accountsData || []).filter(a => a.type === CurrentAccountType.Supplier || a.type === CurrentAccountType.Both).map((a: any) => ({ value: a.id, label: `${a.code} - ${a.name}` })), [accountsData]);
+  const warehouseOptions = useMemo(() => (warehousesData?.items || []).map((w: any) => ({ value: w.id, label: `${w.code} - ${w.name}` })), [warehousesData]);
+  const productOptions = useMemo(() => (productsData?.items || []).map((p: any) => ({ value: p.id, label: `${p.code} - ${p.name}` })), [productsData]);
 
   const selectStyles = (isError: boolean) => ({
     control: (base: any, state: any) => ({
@@ -94,7 +90,6 @@ export const PurchaseForm: React.FC<PurchaseFormProps> = ({
     register,
     control,
     handleSubmit,
-    watch,
     setValue,
     formState: { errors },
   } = useForm<PurchaseFormValues>({
@@ -113,14 +108,16 @@ export const PurchaseForm: React.FC<PurchaseFormProps> = ({
     name: 'items',
   });
 
-  const watchItems = watch('items');
+  const watchItemsRaw = useWatch({ control, name: 'items' });
 
   // Dinamik olarak hesaplamalar (Sadece UX için, backend kendi hesaplıyor)
   const totals = useMemo(() => {
     let subtotal = 0;
     let vatAmount = 0;
+    const products = productsData?.items || [];
+    const items = watchItemsRaw || [];
 
-    watchItems.forEach(item => {
+    items.forEach(item => {
       if (item.productId && item.quantity > 0) {
         const product = products.find(p => p.id === item.productId);
         if (product) {
@@ -138,10 +135,11 @@ export const PurchaseForm: React.FC<PurchaseFormProps> = ({
       vatAmount,
       grandTotal: subtotal + vatAmount
     };
-  }, [watchItems, products]);
+  }, [watchItemsRaw, productsData]);
 
   // Ürün seçildiğinde fiyatin otomatik dolması
   const handleProductChange = (index: number, productId: number) => {
+    const products = productsData?.items || [];
     const product = products.find(p => p.id === productId);
     if (product) {
       setValue(`items.${index}.unitPrice`, product.purchasePrice || 0);
@@ -281,10 +279,12 @@ export const PurchaseForm: React.FC<PurchaseFormProps> = ({
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-100">
                     {fields.map((field, index) => {
-                      const productId = watchItems[index]?.productId;
+                      const items = watchItemsRaw || [];
+                      const productId = items[index]?.productId;
+                      const products = productsData?.items || [];
                       const product = products.find(p => p.id === productId);
-                      const qty = watchItems[index]?.quantity || 0;
-                      const price = watchItems[index]?.unitPrice || 0;
+                      const qty = items[index]?.quantity || 0;
+                      const price = items[index]?.unitPrice || 0;
                       
                       const lineTotal = qty * price;
                       

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Plus, Trash2, AlertCircle, Calculator } from 'lucide-react';
@@ -68,13 +68,9 @@ export const SaleForm: React.FC<SaleFormProps> = ({
     enabled: isOpen,
   });
 
-  const accounts: any[] = useMemo(() => (accountsData || []).filter(a => a.type === CurrentAccountType.Customer || a.type === CurrentAccountType.Both), [accountsData]);
-  const warehouses = warehousesData?.items || [];
-  const products = productsData?.items || [];
-
-  const accountOptions = useMemo(() => accounts.map((a: any) => ({ value: a.id, label: `${a.code} - ${a.name}` })), [accounts]);
-  const warehouseOptions = useMemo(() => warehouses.map((w: any) => ({ value: w.id, label: `${w.code} - ${w.name}` })), [warehouses]);
-  const productOptions = useMemo(() => products.map((p: any) => ({ value: p.id, label: `${p.code} - ${p.name}` })), [products]);
+  const accountOptions = useMemo(() => (accountsData || []).filter(a => a.type === CurrentAccountType.Customer || a.type === CurrentAccountType.Both).map((a: any) => ({ value: a.id, label: `${a.code} - ${a.name}` })), [accountsData]);
+  const warehouseOptions = useMemo(() => (warehousesData?.items || []).map((w: any) => ({ value: w.id, label: `${w.code} - ${w.name}` })), [warehousesData]);
+  const productOptions = useMemo(() => (productsData?.items || []).map((p: any) => ({ value: p.id, label: `${p.code} - ${p.name}` })), [productsData]);
 
   const selectStyles = (isError: boolean) => ({
     control: (base: any, state: any) => ({
@@ -94,7 +90,6 @@ export const SaleForm: React.FC<SaleFormProps> = ({
     control,
     handleSubmit,
     reset,
-    watch,
     setValue,
     formState: { errors },
   } = useForm<SaleFormValues>({
@@ -113,8 +108,8 @@ export const SaleForm: React.FC<SaleFormProps> = ({
     name: 'items',
   });
 
-  const watchItems = watch('items');
-  const watchWarehouseId = watch('warehouseId');
+  const watchItemsRaw = useWatch({ control, name: 'items' });
+  const watchWarehouseId = useWatch({ control, name: 'warehouseId' }) || 0;
 
   useEffect(() => {
     if (isOpen) {
@@ -130,6 +125,7 @@ export const SaleForm: React.FC<SaleFormProps> = ({
   // Handle Product Selection to auto-fill price
   const handleProductChange = (index: number, productId: number) => {
     setValue(`items.${index}.productId`, productId);
+    const products = productsData?.items || [];
     const product = products.find(p => p.id === productId);
     if (product) {
       setValue(`items.${index}.unitPrice`, product.salePrice, { shouldValidate: true });
@@ -140,27 +136,30 @@ export const SaleForm: React.FC<SaleFormProps> = ({
   const [stockMap, setStockMap] = useState<Record<number, number>>({});
 
   // Fetch stocks when warehouse or products change
+  const items = watchItemsRaw || [];
+  const serializedProductIds = JSON.stringify(items.map(i => i.productId));
   useEffect(() => {
-    if (watchWarehouseId > 0 && watchItems.length > 0) {
-      const fetchStocks = async () => {
-        const productIds = watchItems.map(i => i.productId).filter(id => id > 0);
-        if (productIds.length === 0) return;
-        
-        const newStockMap = { ...stockMap };
-        for (const pid of productIds) {
-          try {
-            const stocks = await getProductStocks(pid);
-            const wStock = stocks.find(s => s.warehouseId === watchWarehouseId);
-            newStockMap[pid] = wStock ? wStock.quantity : 0;
-          } catch {
-            newStockMap[pid] = 0;
-          }
+    if (watchWarehouseId <= 0) return;
+    
+    const productIds = JSON.parse(serializedProductIds) as number[];
+    const validIds = productIds.filter(id => id > 0);
+    if (validIds.length === 0) return;
+
+    const fetchStocks = async () => {
+      const results: Record<number, number> = {};
+      for (const pid of validIds) {
+        try {
+          const stocks = await getProductStocks(pid);
+          const wStock = stocks.find(s => s.warehouseId === watchWarehouseId);
+          results[pid] = wStock ? wStock.quantity : 0;
+        } catch {
+          results[pid] = 0;
         }
-        setStockMap(newStockMap);
-      };
-      fetchStocks();
-    }
-  }, [watchWarehouseId, JSON.stringify(watchItems.map(i => i.productId))]);
+      }
+      setStockMap(prev => ({ ...prev, ...results }));
+    };
+    fetchStocks();
+  }, [watchWarehouseId, serializedProductIds]);
 
   // Live Calculations
   const totals = useMemo(() => {
@@ -168,8 +167,10 @@ export const SaleForm: React.FC<SaleFormProps> = ({
     let totalDiscount = 0;
     let totalVat = 0;
     let grandTotal = 0;
+    const products = productsData?.items || [];
+    const items = watchItemsRaw || [];
 
-    watchItems.forEach(item => {
+    items.forEach(item => {
       if (item.productId > 0 && item.quantity > 0 && item.unitPrice > 0) {
         const product = products.find(p => p.id === item.productId);
         const vatRate = product ? product.vatRate : 0;
@@ -188,7 +189,7 @@ export const SaleForm: React.FC<SaleFormProps> = ({
     });
 
     return { subTotal, totalDiscount, totalVat, grandTotal };
-  }, [watchItems, products]);
+  }, [watchItemsRaw, productsData]);
 
   const handleFormSubmit = (data: SaleFormValues) => {
     // Convert to Command
@@ -329,16 +330,18 @@ export const SaleForm: React.FC<SaleFormProps> = ({
 
               <div className="space-y-3">
                 {fields.map((field, index) => {
-                  const currentProductId = watchItems?.[index]?.productId;
-                  const currentQty = watchItems?.[index]?.quantity || 0;
+                  const items = watchItemsRaw || [];
+                  const currentProductId = items?.[index]?.productId;
+                  const currentQty = items?.[index]?.quantity || 0;
                   const currentStock = currentProductId && watchWarehouseId > 0 ? stockMap[currentProductId] ?? null : null;
                   const stockWarning = currentStock !== null && currentQty > currentStock;
                   
+                  const products = productsData?.items || [];
                   const product = products.find(p => p.id === currentProductId);
                   const vatRate = product ? product.vatRate : 0;
                   
-                  const uPrice = watchItems?.[index]?.unitPrice || 0;
-                  const disc = watchItems?.[index]?.discount || 0;
+                  const uPrice = items?.[index]?.unitPrice || 0;
+                  const disc = items?.[index]?.discount || 0;
                   
                   const raw = currentQty * uPrice;
                   const discAmt = raw * (disc / 100);

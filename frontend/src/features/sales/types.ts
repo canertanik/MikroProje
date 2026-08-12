@@ -15,6 +15,7 @@ export interface SaleDto {
   currentAccountId: number;
   currentAccountName: string;
   currentAccountCode: string;
+  currentAccountIsDeleted?: boolean;
   warehouseId: number;
   warehouseName: string;
   saleDate: string;

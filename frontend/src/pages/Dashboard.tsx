@@ -12,6 +12,7 @@ import {
   getDashboardSummary, getDashboardTrends, getRecentActivities, getCriticalStock, getTopRecords 
 } from '../features/dashboard/api';
 import { format, subDays, startOfMonth, startOfYear, subMonths } from 'date-fns';
+import { AiInsightsCard } from '../components/ai/AiInsightsCard';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
@@ -140,6 +141,9 @@ export const Dashboard = () => {
           <option value="all">Tüm Zamanlar</option>
         </select>
       </div>
+
+      {/* AI Insights Card */}
+      <AiInsightsCard />
 
       {/* Main KPIs Row 1 */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

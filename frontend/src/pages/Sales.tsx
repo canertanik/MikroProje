@@ -223,7 +223,14 @@ export const Sales = () => {
                       </div>
                     </td>
                     <td className="p-4 align-middle">
-                      <div className="text-sm font-bold text-gray-900">{sale.currentAccountName}</div>
+                      <div className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                        {sale.currentAccountName}
+                        {sale.currentAccountIsDeleted && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-800" title="Bu cari hesap sistemden silinmiş">
+                            Silinmiş Cari
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs text-gray-500">{sale.currentAccountCode}</div>
                     </td>
                     <td className="p-4 align-middle">
