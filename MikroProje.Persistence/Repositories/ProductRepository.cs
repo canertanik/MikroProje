@@ -92,74 +92,79 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product> CreateWithInitialStockAsync(Product product, int initialStockQuantity, CancellationToken cancellationToken)
     {
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
 
-        try
+        return await strategy.ExecuteAsync(async () =>
         {
-            await _dbContext.Products.AddAsync(product, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
-            if (initialStockQuantity > 0)
+            try
             {
-                var defaultWarehouse = await _dbContext.Warehouses
-                    .Where(x => x.IsDefault && !x.IsDeleted)
-                    .FirstOrDefaultAsync(cancellationToken) 
-                    ?? await _dbContext.Warehouses.Where(x => !x.IsDeleted).FirstOrDefaultAsync(cancellationToken);
+                await _dbContext.Products.AddAsync(product, cancellationToken);
+                await _dbContext.SaveChangesAsync(cancellationToken);
 
-                if (defaultWarehouse == null)
+                if (initialStockQuantity > 0)
                 {
-                    defaultWarehouse = new Warehouse
+                    var defaultWarehouse = await _dbContext.Warehouses
+                        .Where(x => x.IsDefault && !x.IsDeleted)
+                        .FirstOrDefaultAsync(cancellationToken) 
+                        ?? await _dbContext.Warehouses.Where(x => !x.IsDeleted).FirstOrDefaultAsync(cancellationToken);
+
+                    if (defaultWarehouse == null)
                     {
-                        Code = "MRK",
-                        Name = "Merkez Depo",
-                        IsDefault = true,
-                        IsActive = true
+                        defaultWarehouse = new Warehouse
+                        {
+                            Code = "MRK",
+                            Name = "Merkez Depo",
+                            IsDefault = true,
+                            IsActive = true
+                        };
+                        await _dbContext.Warehouses.AddAsync(defaultWarehouse, cancellationToken);
+                        await _dbContext.SaveChangesAsync(cancellationToken);
+                    }
+
+                    var movement = new StockMovement
+                    {
+                        ProductId = product.Id,
+                        WarehouseId = defaultWarehouse.Id,
+                        MovementType = StockMovementType.StockIn,
+                        SourceType = StockMovementSourceType.Manual,
+                        Quantity = initialStockQuantity,
+                        PreviousQuantity = 0,
+                        NewQuantity = initialStockQuantity,
+                        Description = "Initial stock",
+                        MovementDate = DateTime.UtcNow
                     };
-                    await _dbContext.Warehouses.AddAsync(defaultWarehouse, cancellationToken);
+
+                    var warehouseStock = new ProductWarehouseStock
+                    {
+                        ProductId = product.Id,
+                        WarehouseId = defaultWarehouse.Id,
+                        Quantity = initialStockQuantity
+                    };
+
+                    product.StockQuantity = initialStockQuantity;
+                    product.UpdatedDate = DateTime.UtcNow;
+
+                    await _dbContext.StockMovements.AddAsync(movement, cancellationToken);
+                    await _dbContext.ProductWarehouseStocks.AddAsync(warehouseStock, cancellationToken);
                     await _dbContext.SaveChangesAsync(cancellationToken);
                 }
 
-                var movement = new StockMovement
-                {
-                    ProductId = product.Id,
-                    WarehouseId = defaultWarehouse.Id,
-                    MovementType = StockMovementType.StockIn,
-                    SourceType = StockMovementSourceType.Manual,
-                    Quantity = initialStockQuantity,
-                    PreviousQuantity = 0,
-                    NewQuantity = initialStockQuantity,
-                    Description = "Initial stock",
-                    MovementDate = DateTime.UtcNow
-                };
-
-                var warehouseStock = new ProductWarehouseStock
-                {
-                    ProductId = product.Id,
-                    WarehouseId = defaultWarehouse.Id,
-                    Quantity = initialStockQuantity
-                };
-
-                product.StockQuantity = initialStockQuantity;
-                product.UpdatedDate = DateTime.UtcNow;
-
-                await _dbContext.StockMovements.AddAsync(movement, cancellationToken);
-                await _dbContext.ProductWarehouseStocks.AddAsync(warehouseStock, cancellationToken);
-                await _dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                return product;
             }
-
-            await transaction.CommitAsync(cancellationToken);
-            return product;
-        }
-        catch (DbUpdateConcurrencyException exception)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw new ConcurrencyConflictException(exception.Message);
-        }
-        catch
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+            catch (DbUpdateConcurrencyException exception)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw new ConcurrencyConflictException(exception.Message);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        });
     }
     public async Task<List<ProductWarehouseStock>> GetWarehouseStocksAsync(int productId, CancellationToken cancellationToken)
     {
