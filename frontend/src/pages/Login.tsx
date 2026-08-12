@@ -59,7 +59,7 @@ export const Login = () => {
           Hesabınıza giriş yapın
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          MikroProje ERP Admin Paneli
+          Nexora ERP Admin Paneli
         </p>
       </div>
 
