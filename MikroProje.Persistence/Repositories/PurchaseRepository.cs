@@ -88,10 +88,12 @@ public class PurchaseRepository : IPurchaseRepository
 
     public async Task<Purchase> CreatePurchaseAsync(Purchase purchase, List<PurchaseItem> lineItems, CancellationToken cancellationToken)
     {
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-
-        try
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
             // 1. Purchase INSERT (Status = Pending by default)
             purchase.Status = PurchaseStatus.Pending;
             await _dbContext.Purchases.AddAsync(purchase, cancellationToken);
@@ -133,15 +135,18 @@ public class PurchaseRepository : IPurchaseRepository
         {
             await transaction.RollbackAsync(cancellationToken);
             throw;
-        }
+            }
+        });
     }
 
     public async Task<Purchase> ReceivePurchaseAsync(int purchaseId, CancellationToken cancellationToken)
     {
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-
-        try
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
             // 1. Purchase yükle (tracking ile)
             var purchase = await _dbContext.Purchases
                 .Include(x => x.CurrentAccount)
@@ -226,18 +231,19 @@ public class PurchaseRepository : IPurchaseRepository
             await _dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
 
-            return purchase;
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw new ConcurrencyConflictException(ex.Message);
-        }
-        catch
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+                return purchase;
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw new ConcurrencyConflictException(ex.Message);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        });
     }
 
     public async Task CancelPurchaseAsync(int purchaseId, CancellationToken cancellationToken)
@@ -263,9 +269,12 @@ public class PurchaseRepository : IPurchaseRepository
 
     public async Task DeletePurchaseAsync(int purchaseId, CancellationToken cancellationToken)
     {
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-        try
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
         {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
             var purchase = await _dbContext.Purchases
                 .Include(x => x.CurrentAccount)
                 .Include(x => x.Items)
@@ -320,7 +329,8 @@ public class PurchaseRepository : IPurchaseRepository
         {
             await transaction.RollbackAsync(cancellationToken);
             throw;
-        }
+            }
+        });
     }
 
     public async Task<List<MikroProje.Application.Features.SupplierStatements.DTOs.SupplierStatementItemDto>> GetStatementPurchasesAsync(
