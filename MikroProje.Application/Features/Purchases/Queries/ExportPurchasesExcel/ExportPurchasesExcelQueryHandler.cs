@@ -37,7 +37,7 @@ public class ExportPurchasesExcelQueryHandler : IRequestHandler<ExportPurchasesE
         var totalCount = await query.CountAsync(cancellationToken);
         if (totalCount > maxRowCount)
         {
-            return Result<ExcelExportResult>.Fail($"Excel aktarýmý en fazla {maxRowCount:N0} kayýt desteklemektedir. Lütfen filtreleri daraltýn.", 400);
+            return Result<ExcelExportResult>.Fail($"Excel aktarï¿½mï¿½ en fazla {maxRowCount:N0} kayï¿½t desteklemektedir. Lï¿½tfen filtreleri daraltï¿½n.", 400);
         }
 
         var items = await query
@@ -46,8 +46,8 @@ public class ExportPurchasesExcelQueryHandler : IRequestHandler<ExportPurchasesE
             {
                 PurchaseNumber = x.Id.ToString(),
                 PurchaseDate = x.PurchaseDate,
-                SupplierCode = x.CurrentAccount.Code,
-                SupplierName = x.CurrentAccount.Name,
+                SupplierCode = x.CurrentAccount != null ? x.CurrentAccount.Code : string.Empty,
+                SupplierName = x.CurrentAccount != null ? x.CurrentAccount.Name : string.Empty,
                 Subtotal = x.Subtotal,
                 VatAmount = x.VatAmount,
                 GrandTotal = x.GrandTotal,
@@ -55,7 +55,7 @@ public class ExportPurchasesExcelQueryHandler : IRequestHandler<ExportPurchasesE
             })
             .ToListAsync(cancellationToken);
 
-        var result = await _excelExportService.ExportAsync(items, "Alýþlar", cancellationToken);
+        var result = await _excelExportService.ExportAsync(items, "Alï¿½ï¿½lar", cancellationToken);
         return Result<ExcelExportResult>.Ok(result);
     }
 }

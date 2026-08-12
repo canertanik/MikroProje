@@ -55,7 +55,7 @@ public class PurchaseRepository : IPurchaseRepository
             bool isNumericId = int.TryParse(termForId, out int searchId);
 
             query = query.Where(x => (isNumericId && x.Id == searchId) || 
-                                     x.CurrentAccount.Name.ToLower().Contains(term) ||
+                                     (x.CurrentAccount != null && x.CurrentAccount.Name.ToLower().Contains(term)) ||
                                      (x.Description != null && x.Description.ToLower().Contains(term)));
         }
 

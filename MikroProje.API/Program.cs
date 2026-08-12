@@ -47,6 +47,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<MikroProje.Application.Interfaces.ICurrentUserService, MikroProje.API.Services.CurrentUserService>();
 builder.Services.AddEndpointsApiExplorer();
