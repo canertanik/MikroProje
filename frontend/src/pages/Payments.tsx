@@ -140,7 +140,10 @@ export const Payments = () => {
     if (formMode === 'create') {
       createMutation.mutate(payload);
     } else if (selectedPayment) {
-      updateMutation.mutate({ id: selectedPayment.id, command: payload });
+      updateMutation.mutate({
+        id: selectedPayment.id,
+        command: { ...payload, rowVersion: selectedPayment.rowVersion },
+      });
     }
   };
 

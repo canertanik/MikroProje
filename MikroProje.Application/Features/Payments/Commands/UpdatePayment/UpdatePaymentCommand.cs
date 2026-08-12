@@ -9,9 +9,15 @@ public class UpdatePaymentCommand : IRequest<Result<PaymentDto>>
 {
     public int Id { get; set; }
 
+    public int CurrentAccountId { get; set; }
+
+    public decimal Amount { get; set; }
+
     public PaymentMethod PaymentMethod { get; set; }
 
     public string? Description { get; set; }
+
+    public DateTime PaymentDate { get; set; }
 
     public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }

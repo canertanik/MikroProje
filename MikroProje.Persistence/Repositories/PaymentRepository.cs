@@ -107,19 +107,46 @@ public class PaymentRepository : IPaymentRepository
         });
     }
 
-    public async Task<Payment> UpdateAsync(Payment payment, byte[] originalRowVersion, CancellationToken cancellationToken)
+    public async Task<Payment> UpdateAsync(
+        Payment payment,
+        CurrentAccount originalAccount,
+        CurrentAccount targetAccount,
+        decimal originalAmount,
+        byte[] originalRowVersion,
+        CancellationToken cancellationToken)
     {
-        try
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
-            _dbContext.Entry(payment).Property(p => p.RowVersion).OriginalValue = originalRowVersion;
-            payment.UpdatedDate = DateTime.UtcNow;
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            return payment;
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            throw new ConcurrencyConflictException(ex.Message);
-        }
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                _dbContext.Entry(payment).Property(p => p.RowVersion).OriginalValue = originalRowVersion;
+
+                originalAccount.Balance += originalAmount;
+                originalAccount.UpdatedDate = DateTime.UtcNow;
+
+                targetAccount.Balance -= payment.Amount;
+                targetAccount.UpdatedDate = DateTime.UtcNow;
+
+                payment.CurrentAccount = targetAccount;
+                payment.UpdatedDate = DateTime.UtcNow;
+
+                await _dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                return payment;
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw new ConcurrencyConflictException(ex.Message);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        });
     }
 
     public async Task DeleteAsync(Payment payment, CancellationToken cancellationToken)

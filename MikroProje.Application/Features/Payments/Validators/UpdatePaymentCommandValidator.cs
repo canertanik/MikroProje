@@ -10,6 +10,15 @@ public class UpdatePaymentCommandValidator : AbstractValidator<UpdatePaymentComm
         RuleFor(x => x.Id)
             .GreaterThan(0).WithMessage("Id sıfırdan büyük olmalıdır.");
 
+        RuleFor(x => x.CurrentAccountId)
+            .GreaterThan(0).WithMessage("Geçerli bir cari hesap seçilmelidir.");
+
+        RuleFor(x => x.Amount)
+            .GreaterThan(0).WithMessage("Tutar sıfırdan büyük olmalıdır.");
+
+        RuleFor(x => x.PaymentDate)
+            .NotEmpty().WithMessage("Tahsilat tarihi gereklidir.");
+
         RuleFor(x => x.PaymentMethod)
             .IsInEnum().WithMessage("Geçerli bir ödeme yöntemi seçilmelidir.");
 

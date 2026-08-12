@@ -137,10 +137,9 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
               </label>
               <select
                 id="currentAccountId"
-                disabled={mode === 'update'}
                 className={`mt-1 block w-full px-3 py-2 border ${
                   errors.currentAccountId ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm disabled:bg-gray-100`}
+                } rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm`}
                 {...register('currentAccountId')}
               >
                 <option value={0}>Seçiniz...</option>
@@ -163,10 +162,9 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                 type="number"
                 step="0.01"
                 min="0.01"
-                disabled={mode === 'update'}
                 className={`mt-1 block w-full px-3 py-2 border ${
                   errors.amount ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm disabled:bg-gray-100`}
+                } rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm`}
                 {...register('amount')}
               />
               {errors.amount && <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>}
@@ -197,10 +195,9 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
               <input
                 id="paymentDate"
                 type="datetime-local"
-                disabled={mode === 'update'}
                 className={`mt-1 block w-full px-3 py-2 border ${
                   errors.paymentDate ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm disabled:bg-gray-100`}
+                } rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm`}
                 {...register('paymentDate')}
               />
               {errors.paymentDate && <p className="mt-1 text-sm text-red-600">{errors.paymentDate.message}</p>}

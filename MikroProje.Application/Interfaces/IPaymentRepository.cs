@@ -18,7 +18,13 @@ public interface IPaymentRepository
     /// Yalnızca header alanlarını (Description, PaymentMethod vb.) günceller.
     /// Bakiye değişmez. Concurrency için rowVersion gönderilir.
     /// </summary>
-    Task<Payment> UpdateAsync(Payment payment, byte[] originalRowVersion, CancellationToken cancellationToken);
+    Task<Payment> UpdateAsync(
+        Payment payment,
+        CurrentAccount originalAccount,
+        CurrentAccount targetAccount,
+        decimal originalAmount,
+        byte[] originalRowVersion,
+        CancellationToken cancellationToken);
 
     /// <summary>
     /// Soft delete + CurrentAccount.Balance += Amount — tek transaction.

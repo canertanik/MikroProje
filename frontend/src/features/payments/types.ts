@@ -28,6 +28,7 @@ export interface PaymentDto {
   isDeleted: boolean;
   createdDate: string;
   updatedDate?: string;
+  rowVersion: string;
 }
 
 export interface CreatePaymentCommand {
@@ -47,4 +48,5 @@ export interface UpdatePaymentCommand {
   paymentMethod: PaymentMethod;
   description?: string;
   paymentDate: string;
+  rowVersion: string;
 }
