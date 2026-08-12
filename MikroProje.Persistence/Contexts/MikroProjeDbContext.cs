@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using MikroProje.Application.Interfaces;
@@ -80,25 +80,29 @@ public class MikroProjeDbContext : DbContext, IApplicationDbContext
         else
         {
             // Flow A: No outer transaction. Start a transaction here and commit.
-            using var transaction = await Database.BeginTransactionAsync(cancellationToken);
-            try
+            var strategy = Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
-                var result = await base.SaveChangesAsync(cancellationToken);
+                using var transaction = await Database.BeginTransactionAsync(cancellationToken);
+                try
+                {
+                    var result = await base.SaveChangesAsync(cancellationToken);
 
-                AssignIdentitiesToDrafts(auditDrafts);
+                    AssignIdentitiesToDrafts(auditDrafts);
 
-                var auditLogs = auditDrafts.Select(e => e.ToAuditLog()).ToList();
-                await AuditLogs.AddRangeAsync(auditLogs, cancellationToken);
-                await base.SaveChangesAsync(cancellationToken);
+                    var auditLogs = auditDrafts.Select(e => e.ToAuditLog()).ToList();
+                    await AuditLogs.AddRangeAsync(auditLogs, cancellationToken);
+                    await base.SaveChangesAsync(cancellationToken);
 
-                await transaction.CommitAsync(cancellationToken);
-                return result;
-            }
-            catch
-            {
-                await transaction.RollbackAsync(cancellationToken);
-                throw;
-            }
+                    await transaction.CommitAsync(cancellationToken);
+                    return result;
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    throw;
+                }
+            });
         }
     }
 
