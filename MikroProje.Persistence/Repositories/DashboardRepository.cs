@@ -59,16 +59,15 @@ public class DashboardRepository : IDashboardRepository
         dto.CustomerPaymentTotal = await paymentsQuery.SumAsync(x => (decimal?)x.Amount, cancellationToken) ?? 0;
         dto.SupplierPaymentTotal = await supplierPaymentsQuery.SumAsync(x => (decimal?)x.Amount, cancellationToken) ?? 0;
 
-        // 4. Global Receivables and Payables (calculated from transactions to avoid Both mixing)
-        // Global Receivables = Total Sales - Total Payments
-        var globalSales = await _dbContext.Sales.Where(x => !x.IsDeleted).SumAsync(x => (decimal?)x.GrandTotal, cancellationToken) ?? 0;
-        var globalPayments = await _dbContext.Payments.Where(x => !x.IsDeleted).SumAsync(x => (decimal?)x.Amount, cancellationToken) ?? 0;
-        dto.TotalCustomerReceivable = globalSales - globalPayments;
+        // Global Receivables = Sum of balances of Customers
+        dto.TotalCustomerReceivable = await _dbContext.CurrentAccounts
+            .Where(x => !x.IsDeleted && (x.Type == CurrentAccountType.Customer || x.Type == CurrentAccountType.Both) && x.Balance > 0)
+            .SumAsync(x => (decimal?)x.Balance, cancellationToken) ?? 0;
 
-        // Global Payables = Total Received Purchases - Total Supplier Payments
-        var globalPurchases = await _dbContext.Purchases.Where(x => !x.IsDeleted && x.Status == PurchaseStatus.Received).SumAsync(x => (decimal?)x.GrandTotal, cancellationToken) ?? 0;
-        var globalSupplierPayments = await _dbContext.SupplierPayments.Where(x => !x.IsDeleted).SumAsync(x => (decimal?)x.Amount, cancellationToken) ?? 0;
-        dto.TotalSupplierPayable = globalPurchases - globalSupplierPayments;
+        // Global Payables = Sum of balances of Suppliers
+        dto.TotalSupplierPayable = await _dbContext.CurrentAccounts
+            .Where(x => !x.IsDeleted && (x.Type == CurrentAccountType.Supplier || x.Type == CurrentAccountType.Both) && x.Balance > 0)
+            .SumAsync(x => (decimal?)x.Balance, cancellationToken) ?? 0;
 
         // CustomerWithDebtCount: CurrentAccounts where (Sales - Payments > 0)
         // This is complex for a simple count, so we'll approximate with CurrentAccount.Balance for simplicity,
@@ -80,7 +79,7 @@ public class DashboardRepository : IDashboardRepository
             .CountAsync(x => !x.IsDeleted && (x.Type == CurrentAccountType.Customer || x.Type == CurrentAccountType.Both) && x.Balance > 0, cancellationToken);
         
         dto.SupplierWithDebtCount = await _dbContext.CurrentAccounts
-            .CountAsync(x => !x.IsDeleted && (x.Type == CurrentAccountType.Supplier || x.Type == CurrentAccountType.Both) && x.Balance < 0, cancellationToken);
+            .CountAsync(x => !x.IsDeleted && (x.Type == CurrentAccountType.Supplier || x.Type == CurrentAccountType.Both) && x.Balance > 0, cancellationToken);
 
         return dto;
     }
@@ -293,10 +292,10 @@ public class DashboardRepository : IDashboardRepository
 
         dto.TopCreditors = await _dbContext.CurrentAccounts
             .AsNoTracking()
-            .Where(x => !x.IsDeleted && x.Balance < 0 && (x.Type == CurrentAccountType.Supplier || x.Type == CurrentAccountType.Both))
-            .OrderBy(x => x.Balance) // Most negative first
+            .Where(x => !x.IsDeleted && x.Balance > 0 && (x.Type == CurrentAccountType.Supplier || x.Type == CurrentAccountType.Both))
+            .OrderByDescending(x => x.Balance) // Most positive first
             .Take(limit)
-            .Select(x => new TopCreditorDto { SupplierName = x.Name, CreditAmount = Math.Abs(x.Balance) })
+            .Select(x => new TopCreditorDto { SupplierName = x.Name, CreditAmount = x.Balance })
             .ToListAsync(cancellationToken);
 
         return dto;
