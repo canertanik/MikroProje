@@ -39,3 +39,14 @@ TestApp/
 frontend/lint_output.txt
 payload.json
 tatus
+
+logs.txt
+seed_dev_sales.sql
+test_abs.cs
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyd
+*.exe
