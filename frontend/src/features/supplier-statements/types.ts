@@ -15,6 +15,7 @@ export interface SupplierStatementItemDto {
 export interface SupplierStatementResponseDto {
   currentAccountId: number;
   currentAccountName: string;
+  supplierBalance: number;
   items: PagedResult<SupplierStatementItemDto>;
 }
 

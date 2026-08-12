@@ -102,6 +102,7 @@ public class GetSupplierStatementQueryHandler : IRequestHandler<GetSupplierState
         {
             CurrentAccountId = currentAccount.Id,
             CurrentAccountName = currentAccount.Name,
+            SupplierBalance = Math.Round(runningBalance, 2),
             Items = pagedResult
         };
 

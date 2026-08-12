@@ -52,6 +52,7 @@ public class GetSupplierStatementQueryHandlerTests : TestBase
 
         result.Success.Should().BeTrue();
         result.Data.Should().NotBeNull();
+        result.Data.SupplierBalance.Should().Be(50);
         result.Data.Items.Items.Should().HaveCount(2);
 
         var first = result.Data.Items.Items.First(); // Alış

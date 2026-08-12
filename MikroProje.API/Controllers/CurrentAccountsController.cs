@@ -149,7 +149,7 @@ public class CurrentAccountsController : ControllerBase
     }
 
     [HttpGet("{id:int}/statement")]
-    [ProducesResponseType(typeof(Result<MikroProje.Application.Common.Pagination.PagedResult<StatementDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<CurrentAccountStatementResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetStatement(

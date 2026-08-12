@@ -38,11 +38,12 @@ public class GetCurrentAccountStatementQueryHandlerTests : TestBase
 
         result.Success.Should().BeTrue();
         result.Data.Should().NotBeNull();
-        result.Data.Items.Should().HaveCount(2);
+        result.Data.CustomerBalance.Should().Be(50);
+        result.Data.Items.Items.Should().HaveCount(2);
         
         // Check running balance logic
-        result.Data.Items.First().BalanceAfterTransaction.Should().Be(100);
-        result.Data.Items.Last().BalanceAfterTransaction.Should().Be(50); // 100 debit - 50 credit = 50
+        result.Data.Items.Items.First().BalanceAfterTransaction.Should().Be(100);
+        result.Data.Items.Items.Last().BalanceAfterTransaction.Should().Be(50); // 100 debit - 50 credit = 50
     }
 
     [Fact]

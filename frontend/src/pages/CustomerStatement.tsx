@@ -109,6 +109,12 @@ export const CustomerStatement = () => {
     }
   };
 
+  const customerBalance = data?.customerBalance ?? 0;
+  const supplierBalance = selectedAccount?.type === CurrentAccountType.Both
+    ? customerBalance - selectedAccount.balance
+    : 0;
+  const isBoth = selectedAccount?.type === CurrentAccountType.Both;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -179,7 +185,7 @@ export const CustomerStatement = () => {
 
       {/* Özet Kartları */}
       {selectedAccount && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${isBoth ? 'xl:grid-cols-5' : 'xl:grid-cols-3'}`}>
           <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-center">
             <p className="text-sm font-medium text-gray-500 mb-1">Cari Kodu</p>
             <p className="text-xl font-bold text-gray-900">{selectedAccount.code}</p>
@@ -190,16 +196,28 @@ export const CustomerStatement = () => {
               {selectedAccount.name}
             </p>
           </div>
-          <div className={`p-6 rounded-xl border shadow-sm flex flex-col justify-center ${
-            selectedAccount.balance > 0 ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'
-          }`}>
-            <p className={`text-sm font-medium mb-1 ${selectedAccount.balance > 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {selectedAccount.balance > 0 ? 'Müşteri Borç Bakiyesi' : 'Müşteri Alacak Bakiyesi'}
+          <div className="p-6 rounded-xl border border-emerald-100 bg-emerald-50 shadow-sm flex flex-col justify-center">
+            <p className="text-sm font-medium mb-1 text-emerald-700">
+              {customerBalance >= 0 ? 'Müşteriden Alacak' : 'Müşteriye Borç'}
             </p>
-            <p className={`text-2xl font-bold ${selectedAccount.balance > 0 ? 'text-red-700' : 'text-green-700'}`}>
-              {formatCurrency(Math.abs(selectedAccount.balance))}
-            </p>
+            <p className="text-2xl font-bold text-emerald-800">{formatCurrency(Math.abs(customerBalance))}</p>
           </div>
+          {isBoth && (
+            <>
+              <div className="p-6 rounded-xl border border-rose-100 bg-rose-50 shadow-sm flex flex-col justify-center">
+                <p className="text-sm font-medium mb-1 text-rose-700">
+                  {supplierBalance >= 0 ? 'Tedarikçiye Borç' : 'Tedarikçiden Alacak'}
+                </p>
+                <p className="text-2xl font-bold text-rose-800">{formatCurrency(Math.abs(supplierBalance))}</p>
+              </div>
+              <div className="p-6 rounded-xl border border-blue-100 bg-blue-50 shadow-sm flex flex-col justify-center">
+                <p className="text-sm font-medium mb-1 text-blue-700">Net Bakiye</p>
+                <p className="text-2xl font-bold text-blue-800">
+                  {formatCurrency(Math.abs(selectedAccount.balance))} {selectedAccount.balance >= 0 ? 'Alacak' : 'Borç'}
+                </p>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -248,7 +266,7 @@ export const CustomerStatement = () => {
                       Yükleniyor...
                     </td>
                   </tr>
-                ) : data?.items?.length === 0 ? (
+                ) : data?.items?.items?.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-16 text-center text-gray-500">
                       <div className="flex flex-col items-center justify-center">
@@ -261,7 +279,7 @@ export const CustomerStatement = () => {
                     </td>
                   </tr>
                 ) : (
-                  data?.items?.map((item, idx) => (
+                  data?.items?.items?.map((item, idx) => (
                     <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         {formatDateTime(item.date)}
@@ -296,13 +314,13 @@ export const CustomerStatement = () => {
         )}
 
         {/* Pagination */}
-        {data && data.totalPages > 1 && (
+        {data && data.items.totalPages > 1 && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
             <div className="text-sm text-gray-500">
-              Toplam <span className="font-medium text-gray-900">{data.totalCount}</span> kayıttan{' '}
+              Toplam <span className="font-medium text-gray-900">{data.items.totalCount}</span> kayıttan{' '}
               <span className="font-medium text-gray-900">
                 {(page - 1) * pageSize + 1}-
-                {Math.min(page * pageSize, data.totalCount)}
+                {Math.min(page * pageSize, data.items.totalCount)}
               </span>{' '}
               arası gösteriliyor
             </div>
@@ -315,8 +333,8 @@ export const CustomerStatement = () => {
                 Önceki
               </button>
               <button
-                onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
-                disabled={page === data.totalPages}
+                onClick={() => setPage(p => Math.min(data.items.totalPages, p + 1))}
+                disabled={page === data.items.totalPages}
                 className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50"
               >
                 Sonraki

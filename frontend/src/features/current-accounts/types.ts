@@ -57,6 +57,11 @@ export interface StatementDto {
   balanceAfterTransaction: number;
 }
 
+export interface CurrentAccountStatementResponseDto {
+  customerBalance: number;
+  items: import('../../types/api').PagedResult<StatementDto>;
+}
+
 export interface GetStatementParams {
   id: number;
   pageNumber: number;

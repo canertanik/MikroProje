@@ -7,6 +7,8 @@ public class SupplierStatementResponseDto
     public int CurrentAccountId { get; set; }
     
     public string CurrentAccountName { get; set; } = string.Empty;
+
+    public decimal SupplierBalance { get; set; }
     
     public PagedResult<SupplierStatementItemDto> Items { get; set; } = null!;
 }

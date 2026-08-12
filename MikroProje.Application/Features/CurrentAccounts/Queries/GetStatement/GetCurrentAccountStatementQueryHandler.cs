@@ -6,7 +6,7 @@ using MikroProje.Application.Interfaces;
 
 namespace MikroProje.Application.Features.CurrentAccounts.Queries.GetStatement;
 
-public class GetCurrentAccountStatementQueryHandler : IRequestHandler<GetCurrentAccountStatementQuery, Result<PagedResult<StatementDto>>>
+public class GetCurrentAccountStatementQueryHandler : IRequestHandler<GetCurrentAccountStatementQuery, Result<CurrentAccountStatementResponseDto>>
 {
     private readonly ICurrentAccountRepository _currentAccountRepository;
 
@@ -15,17 +15,17 @@ public class GetCurrentAccountStatementQueryHandler : IRequestHandler<GetCurrent
         _currentAccountRepository = currentAccountRepository;
     }
 
-    public async Task<Result<PagedResult<StatementDto>>> Handle(GetCurrentAccountStatementQuery request, CancellationToken cancellationToken)
+    public async Task<Result<CurrentAccountStatementResponseDto>> Handle(GetCurrentAccountStatementQuery request, CancellationToken cancellationToken)
     {
         var currentAccount = await _currentAccountRepository.GetByIdAsync(request.CurrentAccountId, cancellationToken);
         if (currentAccount is null)
         {
-            return Result<PagedResult<StatementDto>>.Fail("Current account not found.", 404);
+            return Result<CurrentAccountStatementResponseDto>.Fail("Current account not found.", 404);
         }
 
         if (currentAccount.Type != MikroProje.Domain.Enums.CurrentAccountType.Customer && currentAccount.Type != MikroProje.Domain.Enums.CurrentAccountType.Both)
         {
-            return Result<PagedResult<StatementDto>>.Fail("Cari ekstre yalnızca müşteri (Customer) veya Both türündeki cariler için alınabilir.", 400);
+            return Result<CurrentAccountStatementResponseDto>.Fail("Cari ekstre yalnızca müşteri (Customer) veya Both türündeki cariler için alınabilir.", 400);
         }
 
         var allTransactions = await _currentAccountRepository.GetStatementTransactionsAsync(request.CurrentAccountId, cancellationToken);
@@ -100,6 +100,10 @@ public class GetCurrentAccountStatementQueryHandler : IRequestHandler<GetCurrent
             request.PageSize,
             totalCount);
 
-        return Result<PagedResult<StatementDto>>.Ok(pagedResult);
+        return Result<CurrentAccountStatementResponseDto>.Ok(new CurrentAccountStatementResponseDto
+        {
+            CustomerBalance = Math.Round(runningBalance, 2),
+            Items = pagedResult
+        });
     }
 }

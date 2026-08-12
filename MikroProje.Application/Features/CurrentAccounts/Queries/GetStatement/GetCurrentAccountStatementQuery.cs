@@ -5,7 +5,7 @@ using MikroProje.Application.Features.CurrentAccounts.DTOs;
 
 namespace MikroProje.Application.Features.CurrentAccounts.Queries.GetStatement;
 
-public class GetCurrentAccountStatementQuery : IRequest<Result<PagedResult<StatementDto>>>
+public class GetCurrentAccountStatementQuery : IRequest<Result<CurrentAccountStatementResponseDto>>
 {
     public int CurrentAccountId { get; set; }
     public DateTime? StartDate { get; set; }

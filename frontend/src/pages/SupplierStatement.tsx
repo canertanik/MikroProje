@@ -97,6 +97,12 @@ export const SupplierStatement = () => {
     }
   };
 
+  const supplierBalance = data?.supplierBalance ?? 0;
+  const customerBalance = selectedAccount?.type === CurrentAccountType.Both
+    ? selectedAccount.balance + supplierBalance
+    : 0;
+  const isBoth = selectedAccount?.type === CurrentAccountType.Both;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -167,7 +173,7 @@ export const SupplierStatement = () => {
 
       {/* Özet Kartları */}
       {selectedAccount && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${isBoth ? 'xl:grid-cols-5' : 'xl:grid-cols-3'}`}>
           <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-center">
             <p className="text-sm font-medium text-gray-500 mb-1">Cari Kodu</p>
             <p className="text-xl font-bold text-gray-900">{selectedAccount.code}</p>
@@ -178,16 +184,28 @@ export const SupplierStatement = () => {
               {selectedAccount.name}
             </p>
           </div>
-          <div className={`p-6 rounded-xl border shadow-sm flex flex-col justify-center ${
-            selectedAccount.balance < 0 ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'
-          }`}>
-            <p className={`text-sm font-medium mb-1 ${selectedAccount.balance < 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {selectedAccount.balance < 0 ? 'Tedarikçi Borcu (Alacağı)' : 'Tedarikçi Bakiyesi'}
+          <div className="p-6 rounded-xl border border-rose-100 bg-rose-50 shadow-sm flex flex-col justify-center">
+            <p className="text-sm font-medium mb-1 text-rose-700">
+              {supplierBalance >= 0 ? 'Tedarikçiye Borç' : 'Tedarikçiden Alacak'}
             </p>
-            <p className={`text-2xl font-bold ${selectedAccount.balance < 0 ? 'text-red-700' : 'text-green-700'}`}>
-              {formatCurrency(Math.abs(selectedAccount.balance))}
-            </p>
+            <p className="text-2xl font-bold text-rose-800">{formatCurrency(Math.abs(supplierBalance))}</p>
           </div>
+          {isBoth && (
+            <>
+              <div className="p-6 rounded-xl border border-emerald-100 bg-emerald-50 shadow-sm flex flex-col justify-center">
+                <p className="text-sm font-medium mb-1 text-emerald-700">
+                  {customerBalance >= 0 ? 'Müşteriden Alacak' : 'Müşteriye Borç'}
+                </p>
+                <p className="text-2xl font-bold text-emerald-800">{formatCurrency(Math.abs(customerBalance))}</p>
+              </div>
+              <div className="p-6 rounded-xl border border-blue-100 bg-blue-50 shadow-sm flex flex-col justify-center">
+                <p className="text-sm font-medium mb-1 text-blue-700">Net Bakiye</p>
+                <p className="text-2xl font-bold text-blue-800">
+                  {formatCurrency(Math.abs(selectedAccount.balance))} {selectedAccount.balance >= 0 ? 'Alacak' : 'Borç'}
+                </p>
+              </div>
+            </>
+          )}
         </div>
       )}
 

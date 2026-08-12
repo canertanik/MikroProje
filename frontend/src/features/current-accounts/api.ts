@@ -1,6 +1,6 @@
 import api from '../../api/axios';
-import type { Result, PagedResult } from '../../types/api';
-import type { CurrentAccountDto, CreateCurrentAccountCommand, UpdateCurrentAccountCommand, StatementDto, GetStatementParams } from './types';
+import type { Result } from '../../types/api';
+import type { CurrentAccountDto, CreateCurrentAccountCommand, UpdateCurrentAccountCommand, CurrentAccountStatementResponseDto, GetStatementParams } from './types';
 
 export const getCurrentAccounts = async (): Promise<CurrentAccountDto[]> => {
   const response = await api.get<Result<CurrentAccountDto[]>>('/api/current-accounts');
@@ -55,7 +55,7 @@ export const getStatement = async (params: GetStatementParams) => {
   if (params.startDate) queryParams.append('startDate', params.startDate);
   if (params.endDate) queryParams.append('endDate', params.endDate);
 
-  const response = await api.get<Result<PagedResult<StatementDto>>>(
+  const response = await api.get<Result<CurrentAccountStatementResponseDto>>(
     `/api/current-accounts/${params.id}/statement?${queryParams.toString()}`
   );
   
