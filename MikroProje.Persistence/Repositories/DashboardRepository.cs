@@ -64,10 +64,11 @@ public class DashboardRepository : IDashboardRepository
             .Where(x => !x.IsDeleted && (x.Type == CurrentAccountType.Customer || x.Type == CurrentAccountType.Both) && x.Balance > 0)
             .SumAsync(x => (decimal?)x.Balance, cancellationToken) ?? 0;
 
-        // Global Payables = Sum of balances of Suppliers
-        dto.TotalSupplierPayable = await _dbContext.CurrentAccounts
-            .Where(x => !x.IsDeleted && (x.Type == CurrentAccountType.Supplier || x.Type == CurrentAccountType.Both) && x.Balance > 0)
+        // Global Payables = Sum of balances of Suppliers where Balance < 0 (meaning we owe them)
+        var rawSupplierPayable = await _dbContext.CurrentAccounts
+            .Where(x => !x.IsDeleted && (x.Type == CurrentAccountType.Supplier || x.Type == CurrentAccountType.Both) && x.Balance < 0)
             .SumAsync(x => (decimal?)x.Balance, cancellationToken) ?? 0;
+        dto.TotalSupplierPayable = Math.Abs(rawSupplierPayable);
 
         // CustomerWithDebtCount: CurrentAccounts where (Sales - Payments > 0)
         // This is complex for a simple count, so we'll approximate with CurrentAccount.Balance for simplicity,
@@ -79,7 +80,7 @@ public class DashboardRepository : IDashboardRepository
             .CountAsync(x => !x.IsDeleted && (x.Type == CurrentAccountType.Customer || x.Type == CurrentAccountType.Both) && x.Balance > 0, cancellationToken);
         
         dto.SupplierWithDebtCount = await _dbContext.CurrentAccounts
-            .CountAsync(x => !x.IsDeleted && (x.Type == CurrentAccountType.Supplier || x.Type == CurrentAccountType.Both) && x.Balance > 0, cancellationToken);
+            .CountAsync(x => !x.IsDeleted && (x.Type == CurrentAccountType.Supplier || x.Type == CurrentAccountType.Both) && x.Balance < 0, cancellationToken);
 
         return dto;
     }
@@ -292,10 +293,10 @@ public class DashboardRepository : IDashboardRepository
 
         dto.TopCreditors = await _dbContext.CurrentAccounts
             .AsNoTracking()
-            .Where(x => !x.IsDeleted && x.Balance > 0 && (x.Type == CurrentAccountType.Supplier || x.Type == CurrentAccountType.Both))
-            .OrderByDescending(x => x.Balance) // Most positive first
+            .Where(x => !x.IsDeleted && x.Balance < 0 && (x.Type == CurrentAccountType.Supplier || x.Type == CurrentAccountType.Both))
+            .OrderBy(x => x.Balance) // Most negative first
             .Take(limit)
-            .Select(x => new TopCreditorDto { SupplierName = x.Name, CreditAmount = x.Balance })
+            .Select(x => new TopCreditorDto { SupplierName = x.Name, CreditAmount = Math.Abs(x.Balance) })
             .ToListAsync(cancellationToken);
 
         return dto;

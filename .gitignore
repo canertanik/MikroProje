@@ -37,3 +37,5 @@ TestApp/
 *.db
 
 frontend/lint_output.txt
+payload.json
+tatus

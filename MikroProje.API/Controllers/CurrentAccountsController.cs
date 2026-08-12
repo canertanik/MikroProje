@@ -72,7 +72,6 @@ public class CurrentAccountsController : ControllerBase
         return StatusCode(result.StatusCode, result);
     }
 
-    [Authorize(Roles = "Admin")]
     [HttpPost]
     [ProducesResponseType(typeof(Result<CurrentAccountDto>), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreateCurrentAccountCommand command, CancellationToken cancellationToken)
@@ -94,7 +93,6 @@ public class CurrentAccountsController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(Result<CurrentAccountDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -114,7 +112,6 @@ public class CurrentAccountsController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

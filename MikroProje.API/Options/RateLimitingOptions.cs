@@ -5,6 +5,8 @@ public class RateLimitingOptions
     public const string SectionName = "RateLimiting";
     public RateLimitPolicyOptions Global { get; set; } = new();
     public RateLimitPolicyOptions Login { get; set; } = new();
+    public RateLimitPolicyOptions AIChat { get; set; } = new();
+    public RateLimitPolicyOptions AIInsights { get; set; } = new();
 }
 
 public class RateLimitPolicyOptions

@@ -14,6 +14,8 @@ public class SaleDto
 
     public string CurrentAccountCode { get; set; } = string.Empty;
 
+    public bool CurrentAccountIsDeleted { get; set; }
+
     public DateTime SaleDate { get; set; }
 
     public decimal TotalAmount { get; set; }

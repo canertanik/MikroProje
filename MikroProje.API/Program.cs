@@ -17,15 +17,20 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCustomObservability(builder);
 
-builder.Services.AddHealthChecks()
+var healthChecksBuilder = builder.Services.AddHealthChecks()
     .AddCheck("live", () => HealthCheckResult.Healthy("Application is live"), tags: new[] { "live" })
     .AddDbContextCheck<MikroProje.Persistence.Contexts.MikroProjeDbContext>(
         name: "sqlserver",
-        tags: new[] { "ready" })
-    .AddRedis(
+        tags: new[] { "ready" });
+
+var isRedisEnabled = builder.Configuration.GetValue<bool>("Redis:Enabled", true);
+if (isRedisEnabled)
+{
+    healthChecksBuilder.AddRedis(
         builder.Configuration["Redis:ConnectionString"]!,
         name: "redis",
         tags: new[] { "ready" });
+}
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 builder.Services.AddCors(options =>
 {
@@ -35,7 +40,8 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins(allowedOrigins)
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .AllowCredentials(); // Required for SSE
         }
     });
 });

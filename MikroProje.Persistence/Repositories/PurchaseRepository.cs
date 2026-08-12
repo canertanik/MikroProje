@@ -212,9 +212,9 @@ public class PurchaseRepository : IPurchaseRepository
             }
 
             // 4. Tedarikçi cari bakiyesi güncelleme
-            // Tedarikçiden ürün aldığımızda ona olan borcumuz artar
+            // Tedarikçiden ürün aldığımızda ona olan borcumuz artar (yani net bakiyesi negatif yönde artar)
             var currentAccount = purchase.CurrentAccount;
-            currentAccount.Balance += purchase.GrandTotal;
+            currentAccount.Balance -= purchase.GrandTotal;
             currentAccount.UpdatedDate = DateTime.UtcNow;
 
             // 5. Purchase durumunu güncelle
@@ -306,7 +306,7 @@ public class PurchaseRepository : IPurchaseRepository
                 }
 
                 var currentAccount = purchase.CurrentAccount;
-                currentAccount.Balance -= purchase.GrandTotal;
+                currentAccount.Balance += purchase.GrandTotal;
                 currentAccount.UpdatedDate = DateTime.UtcNow;
             }
 

@@ -25,6 +25,11 @@ public class DeleteCurrentAccountCommandHandler : IRequestHandler<DeleteCurrentA
             return Result<bool>.Fail("Current account not found.", 404);
         }
 
+        if (currentAccount.Balance != 0)
+        {
+            return Result<bool>.Fail("Bakiyesi bulunan cari hesaplar silinemez. Lütfen önce tahsilat veya ödeme ekleyerek bakiyeyi sıfırlayın.", 400);
+        }
+
         currentAccount.IsDeleted = true;
         currentAccount.UpdatedDate = DateTime.UtcNow;
 

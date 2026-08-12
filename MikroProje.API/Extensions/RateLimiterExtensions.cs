@@ -67,6 +67,34 @@ public static class RateLimiterExtensions
                 });
             });
 
+            options.AddPolicy("AIChat", httpContext =>
+            {
+                var rateLimitingOptions = httpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Options.IOptions<RateLimitingOptions>>().Value;
+                var userId = httpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
+                
+                return RateLimitPartition.GetFixedWindowLimiter(userId, _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = rateLimitingOptions.AIChat.PermitLimit,
+                    Window = TimeSpan.FromSeconds(rateLimitingOptions.AIChat.WindowSeconds),
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit = rateLimitingOptions.AIChat.QueueLimit
+                });
+            });
+
+            options.AddPolicy("AIInsights", httpContext =>
+            {
+                var rateLimitingOptions = httpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Options.IOptions<RateLimitingOptions>>().Value;
+                var userId = httpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "anonymous";
+                
+                return RateLimitPartition.GetFixedWindowLimiter(userId, _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = rateLimitingOptions.AIInsights.PermitLimit,
+                    Window = TimeSpan.FromSeconds(rateLimitingOptions.AIInsights.WindowSeconds),
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit = rateLimitingOptions.AIInsights.QueueLimit
+                });
+            });
+
             options.OnRejected = async (context, token) =>
             {
                 var rateLimitingOptions = context.HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Options.IOptions<RateLimitingOptions>>().Value;

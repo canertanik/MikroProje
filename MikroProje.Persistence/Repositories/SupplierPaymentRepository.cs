@@ -117,8 +117,8 @@ public class SupplierPaymentRepository : ISupplierPaymentRepository
         {
             await _dbContext.SupplierPayments.AddAsync(supplierPayment, cancellationToken);
             
-            // Tedarikçiye ödeme yapılınca bizim borcumuz Amount kadar azalır.
-            currentAccount.Balance -= supplierPayment.Amount;
+            // Tedarikçiye ödeme yapılınca bizim borcumuz Amount kadar azalır. (Net bakiye pozitif yönde artar)
+            currentAccount.Balance += supplierPayment.Amount;
             currentAccount.UpdatedDate = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
