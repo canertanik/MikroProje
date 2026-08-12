@@ -191,7 +191,7 @@ export const Dashboard = () => {
             <p className="ml-16 truncate text-sm font-medium text-gray-500">Toplam Tedarikçi Borcu</p>
           </dt>
           <dd className="ml-16 flex items-baseline pb-1">
-            <p className="text-2xl font-semibold text-gray-900">{formatCurrency(summary?.totalSupplierPayable || 0)}</p>
+            <p className="text-2xl font-semibold text-gray-900">{formatCurrency(Math.abs(summary?.totalSupplierPayable || 0))}</p>
           </dd>
         </div>
       </div>
