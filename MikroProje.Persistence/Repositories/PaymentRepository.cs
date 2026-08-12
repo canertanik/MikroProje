@@ -76,10 +76,12 @@ public class PaymentRepository : IPaymentRepository
 
     public async Task<Payment> CreateAsync(Payment payment, CurrentAccount currentAccount, CancellationToken cancellationToken)
     {
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-
-        try
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
             await _dbContext.Payments.AddAsync(payment, cancellationToken);
             
             // Tahsilat/Ödeme oluşturulunca CurrentAccount.Balance alanından Amount kadar düşülür.
@@ -90,18 +92,19 @@ public class PaymentRepository : IPaymentRepository
             await transaction.CommitAsync(cancellationToken);
 
             payment.CurrentAccount = currentAccount;
-            return payment;
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw new ConcurrencyConflictException(ex.Message);
-        }
-        catch
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+                return payment;
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw new ConcurrencyConflictException(ex.Message);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        });
     }
 
     public async Task<Payment> UpdateAsync(Payment payment, byte[] originalRowVersion, CancellationToken cancellationToken)
@@ -126,10 +129,12 @@ public class PaymentRepository : IPaymentRepository
             await _dbContext.Entry(payment).Reference(x => x.CurrentAccount).LoadAsync(cancellationToken);
         }
 
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-
-        try
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
         {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
             // Soft delete
             payment.IsDeleted = true;
             payment.UpdatedDate = DateTime.UtcNow;
@@ -150,6 +155,7 @@ public class PaymentRepository : IPaymentRepository
         {
             await transaction.RollbackAsync(cancellationToken);
             throw;
-        }
+            }
+        });
     }
 }

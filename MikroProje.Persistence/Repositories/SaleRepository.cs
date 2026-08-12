@@ -88,10 +88,12 @@ public class SaleRepository : ISaleRepository
         CurrentAccount currentAccount,
         CancellationToken cancellationToken)
     {
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-
-        try
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
             // 1. Sale INSERT
             await _dbContext.Sales.AddAsync(sale, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken); // Sale.Id alınır
@@ -183,18 +185,19 @@ public class SaleRepository : ISaleRepository
             // 5. Navigation property'leri doldur (mapper için)
             sale.CurrentAccount = currentAccount;
 
-            return sale;
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw new ConcurrencyConflictException(ex.Message);
-        }
-        catch
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+                return sale;
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw new ConcurrencyConflictException(ex.Message);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        });
     }
 
     public async Task<Sale> UpdateSaleAsync(Sale sale, CancellationToken cancellationToken)
@@ -228,10 +231,12 @@ public class SaleRepository : ISaleRepository
             await _dbContext.Entry(sale).Reference(x => x.CurrentAccount).LoadAsync(cancellationToken);
         }
 
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-
-        try
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
         {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
             foreach (var detail in sale.Details)
             {
                 var product = detail.Product;
@@ -297,6 +302,7 @@ public class SaleRepository : ISaleRepository
         {
             await transaction.RollbackAsync(cancellationToken);
             throw;
-        }
+            }
+        });
     }
 }

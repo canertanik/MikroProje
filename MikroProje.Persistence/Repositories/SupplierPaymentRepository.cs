@@ -111,10 +111,12 @@ public class SupplierPaymentRepository : ISupplierPaymentRepository
 
     public async Task<SupplierPayment> CreateAsync(SupplierPayment supplierPayment, CurrentAccount currentAccount, CancellationToken cancellationToken)
     {
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-
-        try
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
             await _dbContext.SupplierPayments.AddAsync(supplierPayment, cancellationToken);
             
             // Tedarikçiye ödeme yapılınca bizim borcumuz Amount kadar azalır. (Net bakiye pozitif yönde artar)
@@ -136,7 +138,8 @@ public class SupplierPaymentRepository : ISupplierPaymentRepository
         {
             await transaction.RollbackAsync(cancellationToken);
             throw;
-        }
+            }
+        });
     }
 
     public async Task<List<MikroProje.Application.Features.SupplierStatements.DTOs.SupplierStatementItemDto>> GetStatementPaymentsAsync(

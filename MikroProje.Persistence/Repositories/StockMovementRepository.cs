@@ -51,10 +51,12 @@ public class StockMovementRepository : IStockMovementRepository
 
     public async Task<StockMovement> CreateAsync(int productId, StockMovementType movementType, StockMovementSourceType sourceType, int quantity, string? documentNumber, string? description, DateTime movementDate, CancellationToken cancellationToken)
     {
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-
-        try
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
             var product = await _dbContext.Products
                 .FirstOrDefaultAsync(x => x.Id == productId && !x.IsDeleted, cancellationToken);
 
@@ -105,6 +107,7 @@ public class StockMovementRepository : IStockMovementRepository
         {
             await transaction.RollbackAsync(cancellationToken);
             throw;
-        }
+            }
+        });
     }
 }
