@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Caching.Memory;
 using MikroProje.Application.Features.AI.DTOs;
 using MikroProje.Application.Features.AI.Queries.GetProductForecast;
 using MikroProje.Application.Interfaces;
@@ -20,16 +21,20 @@ public class AIController : ControllerBase
     private readonly IDashboardRepository _dashboardRepository;
     private readonly IDemandForecastService _demandForecastService;
 
+    private readonly IMemoryCache _cache;
+
     public AIController(
         IMediator mediator,
         IOpenAiService openAiService,
         IDashboardRepository dashboardRepository,
-        IDemandForecastService demandForecastService)
+        IDemandForecastService demandForecastService,
+        IMemoryCache cache)
     {
         _mediator = mediator;
         _openAiService = openAiService;
         _dashboardRepository = dashboardRepository;
         _demandForecastService = demandForecastService;
+        _cache = cache;
     }
 
     [HttpGet("forecast/products/{id}")]
@@ -50,6 +55,12 @@ public class AIController : ControllerBase
     [EnableRateLimiting("AIInsights")]
     public async Task<IActionResult> GetDashboardInsights(CancellationToken ct)
     {
+        const string cacheKey = "dashboard_ai_insights";
+        if (_cache.TryGetValue(cacheKey, out DashboardInsightDto cachedResult))
+        {
+            return Ok(cachedResult);
+        }
+
         var summary = await _dashboardRepository.GetSummaryAsync(null, null, ct);
         var criticalStocks = await _dashboardRepository.GetCriticalStockAsync(ct);
         
@@ -64,6 +75,14 @@ public class AIController : ControllerBase
         if (!result.Success)
         {
             return BadRequest(new { Error = result.Message });
+        }
+
+        var isFallback = result.Data.Summary?.StartsWith("HATA") == true || 
+                         result.Data.Summary?.Contains("kullanılamıyor") == true;
+
+        if (!isFallback)
+        {
+            _cache.Set(cacheKey, result.Data, TimeSpan.FromMinutes(15));
         }
 
         return Ok(result.Data);
@@ -86,7 +105,7 @@ public class AIController : ControllerBase
 
         var jsonOpts = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-        await foreach (var chunk in _openAiService.ChatStreamAsync(request.Message, userId, ct))
+        await foreach (var chunk in _openAiService.ChatStreamAsync(request.Message, request.History, userId, ct))
         {
             var json = JsonSerializer.Serialize(chunk, jsonOpts);
             await Response.WriteAsync($"data: {json}\n\n", ct);

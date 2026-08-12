@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeSanitize from 'rehype-sanitize';
 import { Sparkles, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import api from '../../api/axios';
 
@@ -106,7 +107,7 @@ export const AiInsightsCard: React.FC = () => {
         ) : (
           <div className="prose prose-sm max-w-none text-gray-700 prose-headings:text-indigo-900 prose-headings:font-semibold prose-a:text-indigo-600 prose-strong:text-indigo-800 prose-li:marker:text-indigo-400">
             {content ? (
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
                 {content}
               </ReactMarkdown>
             ) : (

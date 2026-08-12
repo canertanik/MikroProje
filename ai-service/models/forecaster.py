@@ -21,6 +21,8 @@ class DemandForecaster:
         df = df.sort_values('date').reset_index(drop=True)
         
         if len(df) > 0:
+            # Group by date to prevent duplicate index errors when there are multiple sales on the same day
+            df = df.groupby('date', as_index=False)['quantity'].sum()
             date_range = pd.date_range(start=df['date'].min(), end=df['date'].max(), freq='D')
             df = df.set_index('date').reindex(date_range).fillna(0).rename_axis('date').reset_index()
 

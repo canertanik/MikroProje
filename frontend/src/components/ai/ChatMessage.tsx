@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeSanitize from 'rehype-sanitize';
 import { User, Bot } from 'lucide-react';
 import type { ChatMessage as ChatMessageType } from '../../hooks/useChat';
 
@@ -34,6 +35,7 @@ export const ChatMessage: React.FC<Props> = ({ message }) => {
             <div className="prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-gray-900 prose-pre:text-gray-100">
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeSanitize]}
                 components={{
                   h1: ({ children, ...props }) => <h1 className="text-xl font-bold mt-4 mb-2 text-gray-800" {...props}>{children}</h1>,
                   h2: ({ children, ...props }) => <h2 className="text-lg font-bold mt-3 mb-2 text-gray-800" {...props}>{children}</h2>,

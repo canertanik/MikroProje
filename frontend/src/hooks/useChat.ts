@@ -37,13 +37,17 @@ export const useChat = () => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
     try {
+      const history = messages
+        .slice(-10) // Limit history to last 10 messages to prevent token budget explosion
+        .map(msg => ({ role: msg.role, content: msg.content }));
+
       const response = await fetch(`${baseUrl}/api/ai/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
-        body: JSON.stringify({ message: content }),
+        body: JSON.stringify({ message: content, history }),
         signal: abortControllerRef.current.signal
       });
 
@@ -58,29 +62,39 @@ export const useChat = () => {
         throw new Error('No readable stream available');
       }
 
+      let buffer = '';
+
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         
-        const chunk = decoder.decode(value, { stream: true });
+        buffer += decoder.decode(value, { stream: true });
         
-        const lines = chunk.split('\n');
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const dataStr = line.substring(6);
-            if (dataStr === '[DONE]') continue;
-            
-            try {
-              const data = JSON.parse(dataStr);
-              if (data.type === 'text_delta' && data.content) {
-                setMessages((prev) => prev.map(msg => 
-                  msg.id === aiMsgId 
-                    ? { ...msg, content: msg.content + data.content }
-                    : msg
-                ));
+        let boundaryIndex;
+        while ((boundaryIndex = buffer.indexOf('\n\n')) >= 0) {
+          const messageStr = buffer.slice(0, boundaryIndex).trim();
+          buffer = buffer.slice(boundaryIndex + 2);
+          
+          if (!messageStr) continue;
+          
+          const lines = messageStr.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const dataStr = line.substring(6);
+              if (dataStr === '[DONE]') continue;
+              
+              try {
+                const data = JSON.parse(dataStr);
+                if (data.type === 'text_delta' && data.content) {
+                  setMessages((prev) => prev.map(msg => 
+                    msg.id === aiMsgId 
+                      ? { ...msg, content: msg.content + data.content }
+                      : msg
+                  ));
+                }
+              } catch (e) {
+                console.error('Failed to parse SSE line:', line, e);
               }
-            } catch (e) {
-              console.error('Failed to parse SSE line:', line, e);
             }
           }
         }
@@ -92,7 +106,7 @@ export const useChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [messages]);
 
   const clearChat = useCallback(() => {
     setMessages([]);

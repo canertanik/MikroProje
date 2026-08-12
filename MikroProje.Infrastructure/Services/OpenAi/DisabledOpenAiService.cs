@@ -17,7 +17,7 @@ public class DisabledOpenAiService : IOpenAiService
         }));
     }
 
-    public async IAsyncEnumerable<ChatStreamChunk> ChatStreamAsync(string userMessage, string userId, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct)
+    public async IAsyncEnumerable<ChatStreamChunk> ChatStreamAsync(string userMessage, List<ChatHistoryItemDto>? history, string userId, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct)
     {
         yield return new ChatStreamChunk
         {

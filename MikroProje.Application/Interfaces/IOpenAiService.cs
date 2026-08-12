@@ -16,5 +16,5 @@ public interface IOpenAiService
     /// Tool calling loop'u servis içinde yönetilir.
     /// </summary>
     IAsyncEnumerable<ChatStreamChunk> ChatStreamAsync(
-        string userMessage, string userId, CancellationToken ct);
+        string userMessage, List<ChatHistoryItemDto>? history, string userId, CancellationToken ct);
 }

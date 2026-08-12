@@ -136,7 +136,7 @@ public class OpenAiService : IOpenAiService
     #region Chat Assistant (Streaming + Tool Calling)
 
     public async IAsyncEnumerable<ChatStreamChunk> ChatStreamAsync(
-        string userMessage, string userId, [EnumeratorCancellation] CancellationToken ct)
+        string userMessage, List<ChatHistoryItemDto>? history, string userId, [EnumeratorCancellation] CancellationToken ct)
     {
         var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
         if (string.IsNullOrEmpty(apiKey))
@@ -156,9 +156,18 @@ public class OpenAiService : IOpenAiService
         // Build initial input
         var inputMessages = new List<object>
         {
-            new { role = "system", content = systemPrompt },
-            new { role = "user", content = userMessage }
+            new { role = "system", content = systemPrompt }
         };
+
+        if (history != null)
+        {
+            foreach (var item in history)
+            {
+                inputMessages.Add(new { role = item.Role, content = item.Content });
+            }
+        }
+
+        inputMessages.Add(new { role = "user", content = userMessage });
 
         int iteration = 0;
         string? previousResponseId = null;
