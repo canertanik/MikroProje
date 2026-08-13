@@ -152,7 +152,7 @@ export const Dashboard = () => {
             <div className="absolute rounded-md bg-blue-50 p-3">
               <TrendingUp className="h-6 w-6 text-blue-600" aria-hidden="true" />
             </div>
-            <p className="ml-16 min-h-10 text-sm font-medium leading-5 text-gray-500">Satışlar (Seçili Dönem)</p>
+            <p className="ml-16 text-sm font-medium leading-5 text-gray-500">Satışlar (Seçili Dönem)</p>
           </dt>
           <dd className="ml-16 flex items-baseline pb-1">
             <p className="text-2xl font-semibold text-gray-900">{formatCurrency(summary?.salesTotal || 0)}</p>
@@ -164,7 +164,7 @@ export const Dashboard = () => {
             <div className="absolute rounded-md bg-orange-50 p-3">
               <ShoppingCart className="h-6 w-6 text-orange-600" aria-hidden="true" />
             </div>
-            <p className="ml-16 min-h-10 text-sm font-medium leading-5 text-gray-500">Satın Almalar (Seçili Dönem)</p>
+            <p className="ml-16 text-sm font-medium leading-5 text-gray-500">Satın Almalar (Seçili Dönem)</p>
           </dt>
           <dd className="ml-16 flex items-baseline pb-1">
             <p className="text-2xl font-semibold text-gray-900">{formatCurrency(summary?.purchasesTotal || 0)}</p>
@@ -176,7 +176,7 @@ export const Dashboard = () => {
             <div className="absolute rounded-md bg-green-50 p-3">
               <DollarSign className="h-6 w-6 text-green-600" aria-hidden="true" />
             </div>
-            <p className="ml-16 min-h-10 text-sm font-medium leading-5 text-gray-500">Toplam Müşteri Alacağı</p>
+            <p className="ml-16 text-sm font-medium leading-5 text-gray-500">Toplam Müşteri Alacağı</p>
           </dt>
           <dd className="ml-16 flex items-baseline pb-1">
             <p className="text-2xl font-semibold text-gray-900">{formatCurrency(summary?.totalCustomerReceivable || 0)}</p>
@@ -188,7 +188,7 @@ export const Dashboard = () => {
             <div className="absolute rounded-md bg-red-50 p-3">
               <CreditCard className="h-6 w-6 text-red-600" aria-hidden="true" />
             </div>
-            <p className="ml-16 min-h-10 text-sm font-medium leading-5 text-gray-500">Toplam Tedarikçi Borcu</p>
+            <p className="ml-16 text-sm font-medium leading-5 text-gray-500">Toplam Tedarikçi Borcu</p>
           </dt>
           <dd className="ml-16 flex items-baseline pb-1">
             <p className="text-2xl font-semibold text-gray-900">{formatCurrency(Math.abs(summary?.totalSupplierPayable || 0))}</p>
@@ -206,7 +206,7 @@ export const Dashboard = () => {
             <div className="absolute rounded-md bg-yellow-50 p-3">
               <Clock className="h-6 w-6 text-yellow-600" aria-hidden="true" />
             </div>
-            <p className="ml-16 min-h-10 text-sm font-medium leading-5 text-gray-500">Bekleyen Alımlar</p>
+            <p className="ml-16 text-sm font-medium leading-5 text-gray-500">Bekleyen Alımlar</p>
           </dt>
           <dd className="ml-16 flex items-baseline pb-1">
             <p className="text-2xl font-semibold text-gray-900">{summary?.pendingPurchaseCount || 0}</p>
@@ -221,7 +221,7 @@ export const Dashboard = () => {
             <div className="absolute rounded-md bg-purple-50 p-3">
               <ArrowRightLeft className="h-6 w-6 text-purple-600" aria-hidden="true" />
             </div>
-            <p className="ml-16 min-h-10 text-sm font-medium leading-5 text-gray-500">Draft Transferler</p>
+            <p className="ml-16 text-sm font-medium leading-5 text-gray-500">Draft Transferler</p>
           </dt>
           <dd className="ml-16 flex items-baseline pb-1">
             <p className="text-2xl font-semibold text-gray-900">{summary?.draftTransferCount || 0}</p>
@@ -233,7 +233,7 @@ export const Dashboard = () => {
             <div className="absolute rounded-md bg-indigo-50 p-3">
               <Users className="h-6 w-6 text-indigo-600" aria-hidden="true" />
             </div>
-            <p className="ml-16 min-h-10 text-sm font-medium leading-5 text-gray-500">Borçlu Müşteriler</p>
+            <p className="ml-16 text-sm font-medium leading-5 text-gray-500">Borçlu Müşteriler</p>
           </dt>
           <dd className="ml-16 flex items-baseline pb-1">
             <p className="text-2xl font-semibold text-gray-900">{summary?.customerWithDebtCount || 0} / {summary?.totalCustomerCount || 0}</p>
@@ -245,7 +245,7 @@ export const Dashboard = () => {
             <div className="absolute rounded-md bg-pink-50 p-3">
               <Factory className="h-6 w-6 text-pink-600" aria-hidden="true" />
             </div>
-            <p className="ml-16 min-h-10 text-sm font-medium leading-5 text-gray-500">Alacaklı Tedarikçiler</p>
+            <p className="ml-16 text-sm font-medium leading-5 text-gray-500">Alacaklı Tedarikçiler</p>
           </dt>
           <dd className="ml-16 flex items-baseline pb-1">
             <p className="text-2xl font-semibold text-gray-900">{summary?.supplierWithDebtCount || 0} / {summary?.totalSupplierCount || 0}</p>
